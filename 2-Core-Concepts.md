@@ -168,7 +168,7 @@ mutation {
 }
 ```
 
-## 使用 Subscriptions 的实时更新（Updates）
+## 使用 Subscriptions 实时更新
 
 另外一个对现在很多应用都很重要的需求就是和服务器的实时连接，以方便及时的获取重要消息。对此 GraphQL 提供了 subscriptions 功能。
 
@@ -244,7 +244,7 @@ type Subscription {
 }
 ```
 
-总结一下上文，把所有代码放在一起，所有用来支持 Query，Mutation 和 Subscription 的 schema 就是：
+总结一下这一章，然后把所有代码放在一起，所有用来支持 Query，Mutation 和 Subscription 的 schema 就是：
 
 ```JavaScript
 type Query {
@@ -270,3 +270,5 @@ type Post {
   author: Person!
 }
 ```
+
+🎉～
