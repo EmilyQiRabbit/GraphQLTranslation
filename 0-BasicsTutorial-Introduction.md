@@ -1,7 +1,7 @@
 > * 原文地址：[Basics Tutorial - Introduction](https://www.howtographql.com/basics/0-introduction/)
 > * 译文来自：[Github:EmilyQiRabbit](https://github.com/EmilyQiRabbit/GraphQLTranslation)
 > * 译者：[旺财](https://github.com/EmilyQiRabbit)
-> * **Froofreading is welcomed** 🙋 🎉
+> * **Proofreading is welcomed** 🙋 🎉
 
 # 基础教学 - GraphQL 简介
 

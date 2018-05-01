@@ -2,5 +2,5 @@
 
 Translated By 旺财 🙋
 
-And froofreading is welcomed 🎉
+And proofreading is welcomed 🎉
 

@@ -1,7 +1,7 @@
 > * 原文地址：[Core Concepts](https://www.howtographql.com/basics/2-core-concepts/)
 > * 译文来自：[Github:EmilyQiRabbit](https://github.com/EmilyQiRabbit/GraphQLTranslation)
 > * 译者：[旺财](https://github.com/EmilyQiRabbit)
-> * **Froofreading is welcomed** 🙋 🎉
+> * **Proofreading is welcomed** 🙋 🎉
 
 # 核心概念
 
