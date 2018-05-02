@@ -40,7 +40,7 @@ yarn start
 
 这个操作将会打开浏览器并导航至 http://localhost:3000，也就是应用运行的地址和端口。如果一切顺利，你将会看到：
 
-![graphqlpic6](./imgs/graphqlpic6.png)
+![graphqlpic6](../imgs/graphqlpic6.png)
 
 为了优化项目的结构，在 src 文件中创建两个新的目录，文件 components 包含所有的 React 组件，文件 styles 则包含所有的样式代码。
 

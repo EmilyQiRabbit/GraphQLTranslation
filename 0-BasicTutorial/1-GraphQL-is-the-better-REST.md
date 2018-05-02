@@ -17,11 +17,11 @@ GraphQL 就被设计出来，来满足这种对于灵活性和高效率的需求
 
 使用 REST API，通常会通过访问多个端点来收集数据。在这个例子中，也就是访问 `/users/<id>` 来获取初始用户信息。然后访问类似 `/users/<id>/posts` 这样的接口来获取用户所有的博客信息。第三，访问 `/users/<id>/followers` 接口，将会返回用户所有的 follower。
 
-![rest](./imgs/graphqlpic1.png)
+![rest](../imgs/graphqlpic1.png)
 
 如果使用的是 GraphQL 呢，那么你只需要向 GraphQL 服务发送一个请求，这个请求就包含了具体的数据需求。然后服务就会返回一个 JSON 对象，满足所有刚才客户端发送的数据请求。
 
-![rest](./imgs/graphqlpic2.png)
+![rest](../imgs/graphqlpic2.png)
 
 ## 再也不用担心过度/欠奉的数据获取
 

@@ -35,7 +35,7 @@ GraphQL 的另一个主要用途就是整合多个已有系统，将他们放在
 
 就像前面的架构一样，GraphQL 服务不 care 你用了什么数据库。这个案例中，GraphQL 不 care 它需要从什么数据源中获取数据来 resolve 它收到的 query。
 
-![graphqlpic3](./imgs/graphqlpic3.png)
+![graphqlpic3](../imgs/graphqlpic3.png)
 
 ### 3、连接数据库和整合已有系统的混合使用
 
@@ -43,7 +43,7 @@ GraphQL 的另一个主要用途就是整合多个已有系统，将他们放在
 
 当服务接收到一个 query，它将首先解析它，然后从数据库或者其他的 API 来获取所需数据。
 
-![graphqlpic4](./imgs/graphqlpic4.png)
+![graphqlpic4](../imgs/graphqlpic4.png)
 
 ## Resolver 函数
 
@@ -53,7 +53,7 @@ GraphQL 的另一个主要用途就是整合多个已有系统，将他们放在
 
 当服务端收到一个 query，它就会调用 query payload 中的 field（字段）对应的所有函数。这样，query 就得到了解析，就能够为每一个字段取回数据。一旦所有的 resolver 都返回了，服务器就会将数据打包为 query 要求的格式然后发回客户端。
 
-![graphqlpic5](./imgs/graphqlpic5.png)
+![graphqlpic5](../imgs/graphqlpic5.png)
 
 ## GraphQL 客户端库
 
