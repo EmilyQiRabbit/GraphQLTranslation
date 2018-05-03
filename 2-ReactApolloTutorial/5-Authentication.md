@@ -3,9 +3,9 @@
 > * 译者：[旺财](https://github.com/EmilyQiRabbit)
 > * **Proofreading is welcomed** 🙋 🎉
 
-# 验证
+# 认证
 
-这一章我们将会学习如何配合 Apollo 使用验证方法来为用户提供注册登录功能。
+这一章我们将会学习如何配合 Apollo 使用认证方法来为用户提供注册登录功能。
 
 ## 首先还是要准备好 React 组件
 
