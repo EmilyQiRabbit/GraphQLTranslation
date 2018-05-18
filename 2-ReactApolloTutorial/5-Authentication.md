@@ -96,7 +96,7 @@ _confirm 方法将会执行 mutation，发送登录时需要提供给服务端�
 export const AUTH_TOKEN = 'auth-token'
 ```
 
-组件准备好了，在 App.js 种添加一个新的路由：
+组件准备好了，在 App.js 中添加一个新的路由：
 
 ```JavaScript
 import Login from './Login'
