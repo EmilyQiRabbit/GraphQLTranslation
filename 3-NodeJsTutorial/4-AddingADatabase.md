@@ -181,4 +181,13 @@ yarn global add prisma@1.6.3
 
 在 CLI 的指示中选择任何一个 Development cluster 选项然后按回车（如果你本地有安装 Docker，你也可以在本地部署）。
 
-（待续）
+一旦命令运行结束，CLI 会输出 Prisma GraphQL API 的端口，它差不多会像这样：https://eu1.prisma.sh/public-graytracker-771/hackernews-node/dev
+
+URL 的组成：
+
+* eu1.prisma.sh：cluster 的域名
+* public-graytracker-771：随机生成的服务 ID
+* hackernews-node：来自 prisma.yml 的服务名
+* dev：来自 prisma.yml 的开发阶段（stage）
+
+注意到，CLI 也在 prisma.yml 中添加了一个 cluster 属性。因此在之后的部署中，你就不会再次被提示确认服务部署的地址了 - CLI 将会从 prisma.yml 中读取这个地址。但是如果你把这个属性移除，CLI 就又会重新显示提示。
