@@ -191,3 +191,68 @@ URL 的组成：
 * dev：来自 prisma.yml 的开发阶段（stage）
 
 注意到，CLI 也在 prisma.yml 中添加了一个 cluster 属性。因此在之后的部署中，你就不会再次被提示确认服务部署的地址了 - CLI 将会从 prisma.yml 中读取这个地址。但是如果你把这个属性移除，CLI 就又会重新显示提示。
+
+## 探索 Prisma 服务
+
+点击打开刚才 CLI 输出的 URL，继续 Prisma 数据库 API 的探索。
+
+> 注意：如果你不小心丢失了端口地址，你可以在终端运行 prisma info 来重新获取 URL。
+
+但是、点击 URL 后你将看到这样一段报错信息：
+
+```js
+{
+  "errors": [
+    {
+      "message": " Your token is invalid. It might have expired or you might be using a token from a different project.",
+      "code": 3015,
+      "requestId": "api:api:cjfcbpal10t6w0b91idqif941"
+    }
+  ]
+}
+```
+
+还记得我们之前说过，你的 Prisma API 会被来自 prisma.yml 的密码保护嘛？这就是为什么这里会报错：Playground 试图从端口加载 GraphQL schema，但是请求没有被授权。让我们稍作修改。
+
+在 database 目录下，运行如下代码来生成一个授权 token，它有 prisma.yml 密码的签名。
+
+```
+prisma token
+```
+
+拷贝 CLI 输出的这个 token，然后用它来在 Playground 中配置 HTTP 的头部信息。你也可以用 Playground 左下角的 HTTP HEADERS 面板来完成 -- 注意，你需要将 `__TOKEN__` 占位符用刚才生成的 token 替换掉。
+
+```
+{
+  "Authorization": "Bearer __TOKEN__"
+}
+```
+
+几秒钟后，Playground 就将会加载 schema，你就能够向 Prisma API 发送授权请求了。打开文档，就可以看到可用的 API 操作了。
+
+如果你还想继续探索，还可以发送如下的 mutation 和 query 来创建一个新的 link、并查看所有 link 的列表：
+
+创建新的 Link：
+
+```js
+mutation {
+  createLink(data: {
+    url: "www.prisma.io"
+    description: "Prisma turns your database into a GraphQL API"
+  }) {
+    id
+  }
+}
+```
+
+加载所有 link 元素：
+
+```js
+query {
+  links {
+    id
+    url
+    description
+  }
+}
+```
