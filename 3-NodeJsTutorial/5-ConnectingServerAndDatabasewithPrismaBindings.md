@@ -155,3 +155,124 @@ mutation {
 但是，你如何确定你的 resolver 能够访问到并记忆这些 Prisma binding 实例呢？
 
 ## 创建 Prisma binding 实例
+
+在其他步骤之前，先做所有开发者都最喜欢的步骤：为项目添加一个新的依赖（???）
+
+> 在项目的根目录下，运行如下命令
+
+```js
+yarn add prisma-binding
+```
+
+cool～现在你可以将 Prisma binding 实例和 context 绑定了，这样你的 resolvers 就可以获取到它。
+
+> 在 index.js 中，像下面这样更新 GraphQLServer 的实例（注意，你需要用你自己的 Prisma 终端地址来替代下面的 endpoint 值）：
+
+```js
+const server = new GraphQLServer({
+  typeDefs: './src/schema.graphql',
+  resolvers,
+  context: req => ({
+    ...req,
+    db: new Prisma({
+      typeDefs: 'src/generated/prisma.graphql',
+      endpoint: 'https://eu1.prisma.sh/public-graytracker-771/hackernews-node/dev',
+      secret: 'mysecret123',
+      debug: true,
+    }),
+  }),
+})
+```
+
+这是诀窍：你用如下的信息实例化了 Prisma：
+
+* typeDefs：它指向 Prisma 数据库 schema，它定义了 Prisma 的完整 CRUD GraphQL API。注意，此时你实际上还没有这个文件 - 我们稍后将会告诉你如何得到它。
+
+* endpoint：这是 Prisma API 的端口地址。你需要用你自己的 Prisma 服务地址来替换掉它。
+
+* secret：还记得之前说过的，所有向 Prisma API 发起的请求都需要在 HTTP 请求的 Authorization 头部添加一个 JWT 来认证吗？这个 JWT 需要被 prisma.yml 中的密码签名。虽然你没有做任何直接的对 Prisma API 的请求，但是这些请求都是通过 Prisma binding 实例来帮助你发送的，所以你需要告诉它密码这样它才能够生成 JWT 并和请求一起发送。
+
+* debug：把 debug 标志位设置为 true 意味着所有 Prisma binding 实例发送的请求将会在控制台被打印出来。这是个很方便的方法，可以来观察实际发送给 Prisma 的 GraphQL 请求和修改。
+
+> 最后，为了让这些都能工作，你需要在 index.js 中引入 Prisma。在文件的最开头加入如下的引用行：
+
+```js
+const { Prisma } = require('prisma-binding')
+```
+
+基本完成了，就剩下最后一步了，就是下载 Prisma 数据库 schema，它会在 Prisma 的构造函数中被引用。
+
+## 下载 Prisma 数据库 schema
+
+有多个方法可以访问到 GraphQL API 的 schema。在本教程，你将使用 GraphQL CLI 并结合 graphql-config。这也会带来你的日常工作流的改进。
+
+> 首先，创建一个 .graphqlconfig 文件：
+
+```
+touch .graphqlconfig.yml
+```
+
+这个文件是 GraphQL CLI 主要的信息源。
+
+在文件中添加如下的内容：
+
+```
+projects:
+  app:
+    schemaPath: src/schema.graphql
+    extensions:
+      endpoints:
+        default: http://localhost:4000
+  database:
+    schemaPath: src/generated/prisma.graphql
+    extensions:
+      prisma: database/prisma.yml
+```
+
+这里都做了什么呢？你定义了两个 project。正如你猜测的那样，每个 project 都代表了一个 GraphQL API，应用层的和数据库层的。
+
+对于每个 project，都定义了 schemaPath，这个就是定义了每个 API 的 GraphQL schema 地址。
+
+对于 app 项目，你还要继续定义 endpoint，也就是 GraphQL server 开始运行时候的 URL。
+
+而对于 database 项目，仅仅指出了 prisma.yml 的地址。事实上，提供了这个文件的地址也就提供了 Prisma service 的端口，因为所有有关的端口信息都在这个文件里。
+
+这样的设置，有两个主要的优点：
+
+* 你可以在 playground 中同时和两个 GraphQL API 交互
+
+* 当使用 prisma deploy 部署服务的时候，Prisma CLI 会下载生成的 Prisma 数据库 schema 到本地特定的地址下。
+
+Prisma CLI 也会使用 .graphqlconfig.yml 提供的信息。因此，你可以在根目录下运行 prisma 命令，而不是在 database 地址下了。
+
+在项目的根目录下，运行 prisma deploy 来下载 Prisma 数据库 schema 到本地，具体地址是在 .graphqlconfig.yml 中定义了。
+
+观察命令的输出，你可以看到它打印了如下一行：
+
+```
+Writing database schema to `src/generated/prisma.graphql`  1ms
+```
+
+看～这就是地址 src/generated/prisma.graphql 中的 Prisma 数据库 schema。
+
+好啦，下面就是你可以开始测试服务的最后一步了！
+
+> 打开 src/schema.graphql 然后删除 Link 类型。
+
+哈？为什么？为什么要这么做？那么用于定义 feed 和 post 字段的 Link 类型的定义现在从哪里来呢？答案是，你将会导入它。
+
+> 仍然在 src/schema.graphql 文件中，在顶部添加如下一句话：
+
+```js
+# import Link from "./generated/prisma.graphql"
+```
+
+这个导入语法还并不是官方 GraphQL 定义的，它来自 graphql-yoga 使用的 graphql-import 包，这个包被用于解析 .graphql 文件的依赖。
+
+注意到在这个栗子中，如果不删除 Link 类型，其实也没有什么影响。但是，只定义 Link 类型一次、之后都是复用，这样会更加方便。否则每次你修改 Link 类型的时候，都要修改两个地方。
+
+棒棒哒，现在你可以开始运行服务并测试 API 了。
+
+## 在 Playground 中测试两个 GraphQL API 
+
+[详细操作步骤](https://www.howtographql.com/graphql-js/5-connecting-server-and-database/)
