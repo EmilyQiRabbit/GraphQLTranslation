@@ -51,7 +51,9 @@ context 参数是一个 JS 对象，resolver 链上的所有 resolver 都能对�
 info 对象携带着 GraphQL 请求的信息（格式为 [query AST](https://medium.com/@cjoudrey/life-of-a-graphql-query-lexing-parsing-ca7c5045fad8)）。例如，在 query 的选择集中，它能够表示哪些字段是正在被请求的。
 
 > 注：如果你想要更深入的学习 resolver 的参数，可以阅读下面两篇文章：
+
 > [GraphQL Server Basics: The Schema](https://blog.graph.cool/graphql-server-basics-the-schema-ac5e2950214e)
+
 > [GraphQL Server Basics: Demystifying the info Argument in GraphQL Resolvers](https://www.prisma.io/blog/graphql-server-basics-demystifying-the-info-argument-in-graphql-resolvers-6f26249f613a/)
 
 现在你对 resolver 的参数有了一个基本的了解，我们来看看它们在 resolver 函数中将会如何被应用吧。
@@ -114,4 +116,42 @@ post: (root, args, context, info) => {
 },
 ```
 
+和 feed resolver 相似，你发起了一个和 context 绑定的 Prisma binding 实例方法。
 
+之前说过的，实际上，Prisma binding 实例会将 Prisma 数据库 schema 转化为你可以用 js 调用的方法。调用这些方法将会发起相应的 query/mutation 给 Prisma API。
+
+在这个例子中，你在 Prisma 的 GraphQL schema 发起了 createLink mutation。并将 resolvers 收到的数据通过 args 参数作为函数的参数传递给 Prisma API。
+
+而 info 参数则和上面的例子一样，包含了 mutation 的选择集，它仍然可以用一个 string 来代替：
+
+```js
+const selectionSet = `
+{
+  id
+}
+`
+context.db.mutation.createLink({
+  data: {
+    url: "www.prisma.io"
+    description: "Prisma turns your database into a GraphQL API"
+  }
+}, selectionSet)
+```
+
+它可以和如下发送给 API 的 mutation 对应：
+
+```js
+mutation {
+  createLink(data: {
+    url: "www.prisma.io"
+    description: "Prisma turns your database into a GraphQL API"
+  }) {
+    id
+  }
+```
+
+总结一下： Prisma bindings 让你能够发起和 GraphQL schema 中定义的操作相对应的方法。这些方法和 GraphQL schema 中的操作同名，并且会根据参数的结构，返回相同结构的结果。
+
+但是，你如何确定你的 resolver 能够访问到并记忆这些 Prisma binding 实例呢？
+
+## 创建 Prisma binding 实例
