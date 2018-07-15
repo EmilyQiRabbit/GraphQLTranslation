@@ -4,5 +4,5 @@
 
 Translated By 旺财 🙋
 
-And proofreading is welcomed 🎉
+欢迎校对! 🎉
 
