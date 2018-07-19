@@ -5,13 +5,13 @@
 
 # 核心概念
 
-在这一章，你将会学到基础的 GraphQL 代码结构。包括简单的类型定义，发送请求和修改。[原文这里](https://www.howtographql.com/basics/2-core-concepts/) 为你准备了可以运行代码的沙箱，它基于 [graphql-up](https://github.com/graphcool/graphql-up)，可以用来测试代码。
+在这一章，你将会学到 GraphQL 的基础语言结构。包括类型定义，发送请求和修改的语法。[戳这里](https://www.howtographql.com/basics/2-core-concepts/) 为你准备了可以运行代码的沙箱，它基于 [graphql-up](https://github.com/graphcool/graphql-up)，可以用来测试代码。
 
-## The Schema Definition Language (SDL)：定义 Schema
+## The Schema Definition Language (SDL)：Schema 定义语言
 
-GraphQL 有它自己的 type system，用来定义 API 的 schema。用来写 schema 的语法就叫 Schema Definition Language (SDL)。
+GraphQL 有它自己的类型系统，用来定义 API 的 schema。用来写 schema 的语法就叫 Schema Definition Language (SDL)。
 
-下面是一个简单的栗子，定义一个 Person 类：
+下面是一个简单的栗子，用 SDL 定义一个 Person 类：
 
 ```JavaScript
 type Person {
@@ -20,7 +20,7 @@ type Person {
 }
 ```
 
-这个类型有两个字段：name 和 age，分别是 String 类型和 Int 类型。类型后的 ! 符号表示这个字段的值是必须的。
+这个类型有两个字段（field）：name 和 age，分别是 String 类型和 Int 类型。类型后的 ! 符号表示这个字段的值是必须的。
 
 类型之间的关系也可以用 SDL 来定义。下面这个例子描述了博客 Post 和人 Person 之间的关系：
 
@@ -41,11 +41,11 @@ type Person {
 }
 ```
 
-我们现在建立了一个 Person - Post 的一对多关系，因为 Person 的 posts 字段是一个表示个人所有博客的数组。
+我们现在建立了一个 Person - Post 的一对多关系，Person 的 posts 字段是表示个人所有博客的数组。
 
 ## 使用 Queries 获取数据
 
-如果使用 REST APIs 来获取数据，那么数据是从特定的接口加载的。每个接口都明确定义了返回的数据格式。这就意味着，客户端对数据的需求都高效的编码在了它链接的 URL 中。
+如果使用 REST APIs 来获取数据，那么数据是从特定的接口加载的。每个接口都明确定义了返回的数据格式。这就意味着，客户端对数据的需求都有效的编码在了它链接的 URL 中。
 
 GraphQL 的数据请求就大不相同了。它只暴露一个接口，而不是多个数据结构固定的接口。这个接口返回的数据结构也不固定。这就相当灵活了，并且允许客户端决定它所需要的数据格式。
 
@@ -63,7 +63,7 @@ GraphQL 的数据请求就大不相同了。它只暴露一个接口，而不是
 }
 ```
 
-query 中的 allPersons 字段叫做 root field。root field 字段包含的值，就是这个 query 的 payload。这个 query 规定了的 payload 中的字段只有 name。
+query 中的 allPersons 字段叫做根字段（root field）。root field 字段包含的值，就是这个 query 的有效负荷（payload）。这个 query 规定了的 payload 中的字段只有 name。
 
 这个 query 将会返回数据库中所有的 person 的一个列表，这就是一个应答的例子：
 
@@ -77,7 +77,7 @@ query 中的 allPersons 字段叫做 root field。root field 字段包含的值�
 }
 ```
 
-我们注意到，每个 person 只有 name 被返回了，但是 age 并没有被服务器返回。这就是因为 query 中只定义了 name 字段。
+我们注意到，服务器只返回了每个 person 的 name 字段，但是 age 并没有被返回。这就是因为 query 中只定义了 name 字段。
 
 如果客户端也需要 age 信息，那么只需要稍稍修改 query，在 payload 中增加一个新 age 字段：
 
@@ -90,7 +90,7 @@ query 中的 allPersons 字段叫做 root field。root field 字段包含的值�
 }
 ```
 
-GraphQL 的一个主要优点就是：它允许 query 嵌套信息。例如，如果你想要加载一个 person 的所有 post 信息，那么你只需要这样来构建你的 query 来发起请求：
+GraphQL 的一个主要优点就是：它原生的允许 query 嵌套信息。例如，如果你想要加载一个 person 的所有 post 信息，那么你只需要这样来构建你的 query 来发起请求：
 
 ```JavaScript
 {
@@ -118,7 +118,7 @@ GraphQL 的一个主要优点就是：它允许 query 嵌套信息。例如，�
 
 ## 使用 mutation 来写入数据
 
-下面我们来学习如何修改服务端存储的数据。GraphQL 使用 mutation 来完成这项任务，通常情况下，有三种类型的 mutation：
+下面我们来学习如何修改服务端存储的数据。GraphQL 使用所谓的 mutation 来完成这项任务，通常情况下，有三种类型的 mutation：
 
 * 新建
 * 更新
@@ -148,7 +148,7 @@ mutation {
 }
 ```
 
-当新的对象被创建的时候，服务器将会自动的创建一个唯一的 ID。所以我们可以为之前的 Person type 添加一个 id：
+当新的对象被创建的时候，服务器将会自动的创建一个唯一的 ID。所以我们可以为之前的 Person type 添加一个 id 字段：
 
 ```JavaScript
 type Person {
@@ -158,7 +158,7 @@ type Person {
 }
 ```
 
-现在，如果创建了一个新的 Person，就可以直接在 mutation 的 payload 中请求 id，因为这个信息是之前客户端并不知道的。
+现在，如果创建了一个新的 Person，就可以直接在 mutation 的 payload 中请求 id，因为这个信息是之前客户端并不存在的。
 
 ```JavaScript
 mutation {
@@ -170,9 +170,9 @@ mutation {
 
 ## 使用 Subscriptions 实时更新
 
-另外一个对现在很多应用都很重要的需求就是和服务器的实时连接，以方便及时的获取重要消息。对此 GraphQL 提供了 subscriptions 功能。
+另外一个对现在很多应用都很重要的功能，就是和服务器的实时连接，以方便及时的获取重要消息。对此 GraphQL 提供了 subscriptions 这个概念。
 
-当客户端订阅了某个事件，它就将会初始化一个链接并且和服务器保持这个链接。这样，管什么时候这个特定的事件被触发了，服务器都会推送给客户端相应的信息。不像 query 和 mutation 那样的请求-应答循环，subscriptions 代表了一个向客户端的数据流。
+当客户端订阅了某个事件，它就将会初始化一个链接并且和服务器保持这个链接。这样，管什么时候这个特定的事件被触发了，服务器都会推送给客户端相应的信息。不像 query 和 mutation 那样的请求-应答循环，subscriptions 代表了一个由服务端向客户端的数据流。
 
 subscriptions 的语法和 query、mutation 也很像，下面是一个例子，订阅了 Person type 的事件：
 
@@ -271,4 +271,6 @@ type Post {
 }
 ```
 
-🎉～
+🎉
+
+[self Proofreading +1]
