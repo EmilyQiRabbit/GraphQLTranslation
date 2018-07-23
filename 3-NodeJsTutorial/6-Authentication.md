@@ -182,7 +182,105 @@ module.exports = {
 
 ## 添加 AuthPayload resolver
 
+例如，考虑到如下这个在 GraphQL schema 中定义了的 mutation：
+
+```js
+mutation {
+  login(
+    email: "sarah@graph.cool"
+    password: "graphql"
+  ) {
+    token
+    user {
+      id
+      name
+      links {
+        url
+        description
+      }
+    }
+  }
+}
+```
+
+这就是一个正常的 login mutation，但是需要服务器返回正在登录的用户的相关信息。那么 mutation 的这个 selection set（选择集合）应当如何解析呢？
+
+目前的 resolver 实现只能返回用户 id，其他的信息均不返回。解决方案就是，实现一个附加的 AuthPayload resolver 函数，并取回 mutation 所要求的数据。
+
+打开 resolver 目录下的 AuthPayload.js 文件并添加如下代码：
+
+```js
+function user(root, args, context, info) {
+  return context.db.query.user({ where: { id: root.user.id } }, info)
+}
+
+module.exports = { user }
+```
+
+这里就是 login mutation 的 selection set（选择集合）如何解析并从数据库获取数据的。
+
+> 注意：一开始就理解这里可能会有些困难。想要深入了解，可以参考这篇 [Github issue](https://github.com/prismagraphql/prisma/issues/1737) 或者阅读这篇[博客](https://www.prisma.io/blog/graphql-server-basics-demystifying-the-info-argument-in-graphql-resolvers-6f26249f613a/)。
+
+下面我们继续完成功能的实现。
+
+首先，为项目添加必要的依赖：
+
+```sh
+yarn add jsonwebtoken bcryptjs
+```
+
+然后，创建一些可复用的工具方法：
+
+目录 src 下创建文件 utiles.js
+
+```sh
+touch src/utils.js
+```
+
+然后粘贴如下代码：
+
+```js
+const jwt = require('jsonwebtoken')
+const APP_SECRET = 'GraphQL-is-aw3some'
+
+function getUserId(context) {
+  const Authorization = context.request.get('Authorization')
+  if (Authorization) {
+    const token = Authorization.replace('Bearer ', '')
+    const { userId } = jwt.verify(token, APP_SECRET)
+    return userId
+  }
+
+  throw new Error('Not authenticated')
+}
+
+module.exports = {
+  APP_SECRET,
+  getUserId,
+}
+```
+
+APP_SECRET 用来为分发给用户的 jsts 签名。它完全依赖于 prisma.yml 中定义的 secret。事实上，它和 Prisma 没有什么关系，如果你换一种方式来实现数据库层，APP_SECRET 也还是一样的使用方法。
+
+getUserId 是一个辅助函数，你将会在需要认证的 resolver 中调用它。它首先会从 http 请求中取回包含用户 jwt 的 Authorization 头部信息。然后认证 jwt 并从中取得用户 id。注意到这一步可能不一定会成功执行，那么函数就会抛出一个错误。因此你也就能够利用它“保护”请求认证的 resolver。
+
+最后，为 Mutation.js 添加 import：
+
+```js
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const { APP_SECRET, getUserId } = require('../utils')
+```
+
+## 为 post mutation 添加认证
+
 待续.....
+
+
+
+
+
+
 
 
 
