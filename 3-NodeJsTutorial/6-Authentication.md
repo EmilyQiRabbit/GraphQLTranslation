@@ -274,25 +274,120 @@ const { APP_SECRET, getUserId } = require('../utils')
 
 ## 为 post mutation 添加认证
 
-待续.....
+在真正测试你的认证流之前，确保完成 schema/resolver 函数的构建。目前 post resolver 还没有写。
 
+在 Mutation.js 中，添加 post resolver 的实现：
 
+```js
+function post(parent, args, context, info) {
+  const userId = getUserId(context)
+  return context.db.mutation.createLink(
+    {
+      data: {
+        url: args.url,
+        description: args.description,
+        postedBy: { connect: { id: userId } },
+      },
+    },
+    info,
+  )
+}
+```
 
+和前面的实现相比，上文的这个实现有两点不同：
 
+1. 现在你用 getUserId 函数来从 jwt 存储中获取用户的 id，它被设置在了传入的 http 请求的认证头部里。因此，你就知道了是哪个用户创建了 Link。前文中提过，如果获取用户 id 失败，将会导致错误，那么函数就会在新建 Link 之前退出了。
 
+2. 接下来你还需要用这个 userId 来链接当前这个用户创建的 Link。这个是通过 connect mutation 实现的。
 
+棒极了！最后，你需要用信息 resolver 来实现 index.js 中的代码：
 
+打开 index.js 然后在文件顶部引入包含 resolvers 的模块：
 
+```js
+const Query = require('./resolvers/Query')
+const Mutation = require('./resolvers/Mutation')
+const AuthPayload = require('./resolvers/AuthPayload')
+```
 
+然后更新 resolvers 对象：
 
+```js
+const resolvers = {
+  Query,
+  Mutation,
+  AuthPayload
+}
+```
 
+现在你可以测试一下这个认证流了！
 
+## 测试
 
+测试 signup mutation 的第一件事就是在数据库中新建一个 user。
 
+> 如果你还没有这么做，ctrl+c 停止服务，然后运行 node src/index.js。之后通过在 GraphQL CLI 中运行 graphql playground 打开 playground。
 
+注意到，只要你一直没有关闭页面，你就你可一重复利用你的 playground —— 重要的是你是否启动了服务，所以你做的变化能够被应用。
 
+现在，发送如下的 mutation 来创建用户：
 
+```js
+mutation {
+  signup(
+    name: "Alice"
+    email: "alice@graph.cool"
+    password: "graphql"
+  ) {
+    token
+    user {
+      id
+    }
+  }
+}
+```
 
+从服务端返回的应答中拷贝认证 token 然后打开另一个标签页。在这个新的标签页中，从左下角打开 HTTP HEADERS 面板然后填写好认证头部。
 
+```js
+{
+  "Authorization": "Bearer __TOKEN__"
+}
+```
 
+现在，无论你在这个面板发送 query 还是 mutation，它都会挟带这这个认证 token。
 
+有了这个认证头部，发送如下的 post 请求到你的 GraphQL 服务：
+
+```js
+mutation {
+  post(
+    url: "www.graphql-europe.org"
+    description: "Europe's biggest GraphQL conference"
+  ) {
+    id
+  }
+}
+```
+
+服务收到这个请求，就会触发 post resolver 函数，然后认证提供的 jwt。接下来，一个新的 Link 就被创建了。
+
+为了确认一切正常工作，你可以发送如下 login mutation：
+
+```js
+mutation {
+  login(
+    email: "alice@graph.cool"
+    password: "graphql"
+  ) {
+    token
+    user {
+      email
+      links {
+        url
+        description
+      }
+    }
+  }
+}
+```
