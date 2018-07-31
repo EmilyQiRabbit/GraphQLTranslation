@@ -270,28 +270,200 @@ const resolvers = {
 }
 ```
 
-## subscriptions 的测试
+## subscriptions 测试
 
-待续...
+做好了上面所有这些代码的准备，可以开始测试了。你可以通过同时使用 GraphQL Playground 的两个实例（窗口）来完成。
 
+* 需要通过 ctrl+c 停止服务然后再次运行 node src/index.js
 
+* 然后，打开两个浏览窗口并导航至地址：http://localhost:4000
 
+你将要使用第一个 Playground 来发送订阅请求，并建立一个和服务端的永久性的 websocket 连接；用第二个来发送 post mutation 触发订阅。
 
+在第一个 Playground 中，发送如下订阅：
 
+```js
+subscription {
+  newLink {
+    node {
+      id
+      url
+      description
+      postedBy {
+        id
+        name
+        email
+      }
+    }
+  }
+}
+```
 
+和发送 query 以及 mutation 不同，发送 subscription 将不会看到及时的结果。相反，将会显示一个旋转的 loading 标识，表示服务器在等待事件的发生。
 
+是时候触发 subscription 事件了。
 
+在另一个 GraphQL Playground 中发送如下 post mutation。记得需要首先授权（授权的具体操作参见前一章）。
 
+```js
+mutation {
+  post(
+    url: "www.graphqlweekly.com"
+    description: "Curated GraphQL content coming to your email inbox every Friday"
+  ) {
+    id
+  }
+}
+```
 
+现在，可以去看看发送了订阅的 Playground 中发生了什么？
 
+## 添加投票功能
 
+投票功能允许用户为特定的 link 点赞。第一步还是需要扩展代表投票的 Prisma 数据模型。
 
+打开 database/datamodel.graphql 并调整为：
 
+```js
+type Link {
+  id: ID! @unique
+  createdAt: DateTime!
+  description: String!
+  url: String!
+  postedBy: User
+  votes: [Vote!]!
+}
 
+type User {
+  id: ID! @unique
+  name: String!
+  email: String! @unique
+  password: String!
+  links: [Link!]!
+  votes: [Vote!]!
+}
 
+type Vote {
+  id: ID! @unique
+  link: Link!
+  user: User!
+}
+```
 
+如你所见，你为数据模型添加了一个新的 Vote 类型。它和 User 类型以及 Link 类型都是是一对多的关系。
 
+为了应用这些变化，并更新 Prisma GraphQL API，这样它才能包含 Vote 类型的增删改查操作。你需要重新部署服务。
 
+```sh
+prisma deploy
+```
 
+现在，已经了解了 schema 驱动的开发模式，下一步就是去扩展 schema 的定义，这样你的 GraphQL 服务就可以暴露出一个 vote mutation 的接口：
 
+```js
+type Mutation {
+  post(url: String!, description: String!): Link!
+  signup(email: String!, password: String!, name: String!): AuthPayload
+  login(email: String!, password: String!): AuthPayload
+  vote(linkId: ID!): Vote
+}
+```
 
+Vote 类型依旧需要从 Prisma database schema 中引入：
+
+```js
+# import Link, LinkSubscriptionPayload, Vote from "./generated/prisma.graphql"
+```
+
+下一步，实现相关的 resolver 函数。
+
+在 src/resolvers/Mutation.js 中添加如下函数：
+
+```js
+async function vote(parent, args, context, info) {
+  // 1
+  const userId = getUserId(context)
+
+  // 2
+  const linkExists = await context.db.exists.Vote({
+    user: { id: userId },
+    link: { id: args.linkId },
+  })
+  if (linkExists) {
+    throw new Error(`Already voted for link: ${args.linkId}`)
+  }
+
+  // 3
+  return context.db.mutation.createVote(
+    {
+      data: {
+        user: { connect: { id: userId } },
+        link: { connect: { id: args.linkId } },
+      },
+    },
+    info,
+  )
+}
+```
+
+解释一下：
+
+1. 和 post resolver 类似，第一步是通过 getUserId 函数认证请求的 jwt。如果认证成功，函数将会返回发起请求的用户的 userId，如果认证失败，函数将会抛出错误。
+
+2. db.exists.Vote(...) 函数你可能会觉得陌生。Prisma binding 对象不仅仅暴露 Prisma database schema 中对应 query、mutation、subscription 的函数，也会对应每个 data modal 生成一个 exists 函数。exists 函数接受一个 where 过滤器参数，允许你定义该类型元素的特定的条件。当满足条件的元素在数据库中至少存在一个的时候，exists 函数将会返回 true。在上文的例子中，我们使用 exists 函数来保证发起请求的用户还没有为这个 Link 投票过。
+
+3. 如果 exists 函数返回了 false，createVote 函数将会创建一个新的 Vote 元素，并和 User 以及 Link 实例相关联。
+
+同时，别忘了在 export 语句中添加 vote resolver：
+
+```js
+module.exports = {
+  post,
+  signup,
+  login,
+  vote,
+}
+```
+
+这一章最后的一个任务，就是为新建投票添加一个订阅 subscription。方法和 newLink 类似。
+
+为应用 schema 的 Subscription 添加一个新的字段：
+
+```js
+type Subscription {
+  newLink: LinkSubscriptionPayload
+  newVote: VoteSubscriptionPayload
+}
+```
+
+然后，从 Prisma API 的 GraphQL schema 中导入 VoteSubscriptionPayload：
+
+```js
+# import Link, LinkSubscriptionPayload, Vote, VoteSubscriptionPayload from "./generated/prisma.graphql"
+```
+
+最后，添加订阅的 resolver 函数：
+
+```js
+function newVoteSubscribe (parent, args, context, info) {
+  return context.db.subscription.vote(
+    { where: { mutation_in: ['CREATED'] } },
+    info,
+  )
+}
+
+const newVote = {
+  subscribe: newVoteSubscribe
+}
+```
+
+并更新 export 语句：
+
+```js
+module.exports = {
+  newLink,
+  newVote,
+}
+```
+
+一切就绪，下面可以开始测试 newVote 订阅功能了。
