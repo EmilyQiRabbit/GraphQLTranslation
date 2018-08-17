@@ -291,3 +291,5 @@ function post(parent, { url, description }, ctx, info) {
 ```
 
 注意：如果 ctx 没有提供有效的 token，那么 getUserId 方法将会报错。
+
+[self Proofreading +1]

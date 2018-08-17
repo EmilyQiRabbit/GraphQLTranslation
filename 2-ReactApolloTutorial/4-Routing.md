@@ -5,11 +5,11 @@
 
 # 路由
 
-这一章我们将会学到如何和 Apollo 一起应用 react-router，来实现导航功能。
+这一章我们将会学到如何将 Apollo 和 react-router 联合，来实现导航功能。
 
 ## 安装依赖
 
-在命令行输入：
+打开命令行，导航至项目根目录下，输入：
 
 ```
 yarn add react-router react-router-dom
@@ -19,7 +19,7 @@ yarn add react-router react-router-dom
 
 在为应用配置路由之前，首先需要一个 Header 元素来导航应用内的不同页面。
 
-在 components 目录下，创建 Header.js，然后加入如下代码：
+在 components 目录下，创建 Header.js，然后粘贴如下代码：
 
 ```JavaScript
 import React, { Component } from 'react'
@@ -50,7 +50,7 @@ export default withRouter(Header)
 
 这段代码渲染了两个 Link 组件，用户可以用来在 LinkList 和 CreateLink 两个组件之间导航。
 
-> 注意，这里的 Link 组件和我们刚才写的那个 Link 组件没什么关系。这里的 Link 组件来自 'react-router-dom'。
+> 注意，这里的 Link 组件和我们刚才写的那个 Link 组件没什么关系。这里的 Link 组件来自 'react-router-dom'，它作为链接导航不同页面。
 
 ## 配置路由 
 
@@ -100,21 +100,18 @@ ReactDOM.render(
 
 ## 应用导航
 
-在 mutation 生效之后，完成路由跳转：
+本节的任务：在 mutation 请求生效之后，完成 CreateLink 到 LinkList 的路由跳转：
 
-重写 CreateLink.js 的 _createLink 方法
+更新 CreateLink.js 的 <Mutation /> 组件
 
 ```JavaScript
-_createLink = async () => {
-  const { description, url } = this.state
-  await this.props.postMutation({
-    variables: {
-      description,
-      url,
-    },
-  })
-  this.props.history.push('/')
-}
+<Mutation
+  mutation={POST_MUTATION}
+  variables={{ description, url }}
+  onCompleted={() => this.props.history.push('/')}
+>
+  {postMutation => <button onClick={postMutation}>Submit</button>}
+</Mutation>
 ```
 
 [self Proofreading +1]
