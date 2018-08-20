@@ -248,3 +248,5 @@ _updateCacheAfterVote = (store, createVote, linkId) => {
 ```
 
 完成了，现在当修改了 vote 之后，update 将会被触发然后 store 也会跟着更新。store 的更新将会让组件重新渲染，在 UI 上，就可以看到最新的信息了。
+
+[self Proofreading +1]
