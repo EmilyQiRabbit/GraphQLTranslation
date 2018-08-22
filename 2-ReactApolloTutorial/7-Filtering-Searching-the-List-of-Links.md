@@ -184,3 +184,5 @@ _executeSearch = async () => {
 完成了。现在你可以手动执行 FEED_SEARCH_QUERY 然后从服务端获取结果。之后这些信息将作为组件的 state，被渲染在界面上。
 
 用 yarn start 启动服务试试看吧！
+
+[self Proofreading +1]
