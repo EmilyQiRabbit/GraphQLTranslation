@@ -5,13 +5,13 @@
 
 # 过滤器：查找特定的 Link 列表
 
-这一章，我们将会学习如何使用 GraphQL API 来实现过滤功能
+这一章，我们将会学习如何使用 GraphQL API 来实现查找功能
 
-## 当然了，还是要先准备 React 元素啦
+## 准备 React 元素
 
-我们新建一个路由也就是新建一个页面，当然也是新的 React 元素：
+新建一个路由也就需要新建一个页面，当然也是新的 React 元素：
 
-在 components 文件目录下新建 Search.js 文件
+在 src/components 文件目录下新建 Search.js 文件，然后添加如下代码：
 
 ```JavaScript
 import React, { Component } from 'react'
@@ -33,29 +33,26 @@ class Search extends Component {
           Search
           <input
             type='text'
-            onChange={(e) => this.setState({ filter: e.target.value })}
+            onChange={e => this.setState({ filter: e.target.value })}
           />
-          <button
-            onClick={() => this._executeSearch()}
-          >
-            OK
-          </button>
+          <button onClick={() => this._executeSearch()}>OK</button>
         </div>
-        {this.state.links.map((link, index) => <Link key={link.id} link={link} index={index}/>)}
+        {this.state.links.map((link, index) => (
+          <Link key={link.id} link={link} index={index} />
+        ))}
       </div>
     )
   }
 
   _executeSearch = async () => {
-    // ... you'll implement this in a bit
+    // ... you'll implement this soon
   }
-
 }
 
 export default withApollo(Search)
 ```
 
-熟悉的操作，标准的初始化流程。在这个 input 中用户可以输入想要查找的东西。
+这是一个标准的初始化流程。在这个 input 中用户可以输入想要查找的内容。
 
 组件的 state 的 links 字段将会包含所有被渲染的 link，并且这次我们不能通过组件 props 来获取查询结果。我们将使用 withApollo 的方法来完成这个功能。
 
@@ -70,10 +67,10 @@ render() {
       <Header />
       <div className='ph3 pv1 background-gray'>
         <Switch>
-          <Route exact path='/' component={LinkList}/>
-          <Route exact path='/create' component={CreateLink}/>
-          <Route exact path='/login' component={Login}/>
-          <Route exact path='/search' component={Search}/>
+          <Route exact path='/' component={LinkList} />
+          <Route exact path='/create' component={CreateLink} />
+          <Route exact path='/login' component={Login} />
+          <Route exact path='/search' component={Search} />
         </Switch>
       </div>
     </div>
@@ -108,7 +105,7 @@ render() {
 
 ## 查找 Links
 
-在 Search.js 中加上：
+在 Search.js 中加上请求的定义：
 
 ```JavaScript
 const FEED_SEARCH_QUERY = gql`
@@ -135,7 +132,7 @@ const FEED_SEARCH_QUERY = gql`
 `
 ```
 
-这个 query 和 LinkLiist 的 query 很像，但是多了一个参数：filter。它将会限制你返回的 links 结果。
+这个 query 和 LinkList 的 query 很像，但是多了一个参数：filter。它将会作为条件，限制你返回的 links 结果。
 
 实际的 filter 操作在 server/src/resolvers/Query.js 文件中的 feed resolver 中实现：
 
@@ -155,7 +152,7 @@ async function feed(parent, args, ctx, info) {
 }
 ```
 
-哎呦反正我现在看不懂，要写到 Node 教程那边才能懂吧～
+哎呦反正我现在看不懂，要看 Node 教程那边才能懂～
 
 大概讲一下：
 
@@ -163,7 +160,7 @@ async function feed(parent, args, ctx, info) {
 
 完美～现在 query 都定义好了。这一次，我们希望用户按下 search 按钮后才获取数据，而不是组件一加载的时候。
 
-这就是 withApollo 方法的目的。这个方法将 ApolloClient 实例作为 client prop 注入到了 Search 组件里。
+这就是应用 withApollo 方法的目的。这个方法将 ApolloClient 实例作为 client prop 注入到了 Search 组件里。
 
 这个 client 中有一个 query 方法，你可以用它来手动发送请求，而不是使用之前那样的 graphql 高阶组件的方法。
 
@@ -184,5 +181,74 @@ _executeSearch = async () => {
 完成了。现在你可以手动执行 FEED_SEARCH_QUERY 然后从服务端获取结果。之后这些信息将作为组件的 state，被渲染在界面上。
 
 用 yarn start 启动服务试试看吧！
+
+Search.js 的完整代码：
+
+```js
+import React, { Component } from 'react'
+import { withApollo } from 'react-apollo'
+import gql from 'graphql-tag'
+import Link from './Link'
+
+const FEED_SEARCH_QUERY = gql`
+  query FeedSearchQuery($filter: String!) {
+    feed(filter: $filter) {
+      links {
+        id
+        url
+        description
+        createdAt
+        postedBy {
+          id
+          name
+        }
+        votes {
+          id
+          user {
+            id
+          }
+        }
+      }
+    }
+  }
+`
+
+class Search extends Component {
+  state = {
+    links: [],
+    filter: '',
+  }
+
+  render() {
+    return (
+      <div>
+        <div>
+          Search
+          <input
+            type="text"
+            onChange={e => this.setState({ filter: e.target.value })}
+          />
+          <button onClick={() => this._executeSearch()}>OK</button>
+        </div>
+        {this.state.links.map((link, index) => (
+          <Link key={link.id} link={link} index={index} />
+        ))}
+      </div>
+    )
+  }
+
+  _executeSearch = async () => {
+    const { filter } = this.state
+    const result = await this.props.client.query({
+      query: FEED_SEARCH_QUERY,
+      variables: { filter },
+    })
+    const links = result.data.feed.links
+    this.setState({ links })
+  }
+}
+
+export default withApollo(Search)
+```
 
 [self Proofreading +1]
