@@ -236,3 +236,5 @@ _createLink = async () => {
   this.props.history.push(`/new/1`)
 }
 ```
+
+[self Proofreading +1]
