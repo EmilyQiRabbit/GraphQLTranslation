@@ -3,13 +3,13 @@
 > * 译者：[旺财](https://github.com/EmilyQiRabbit)
 > * **Proofreading is welcomed** 🙋 🎉
 
-# 开始吧！
+# 入门简介
 
-在这部分章节中，你将搭建 GraphQL 服务并完成第一个 GraphQL 请求。最后，我们将会稍微讲解一下 GraphQL 的原理并学习 GraphQL schema。
+在这部分章节中，你将搭建 GraphQL 服务并第一次回复 GraphQL 请求。最后，我们将会稍微讲解一下 GraphQL 的原理并学习 GraphQL schema。
 
 ## 创建项目
 
-本篇教程将教会你如何从零开始搭建一个 GraphQL 服务，所以，你要做的第一件是就是创建一个目录来容纳服务所需的所有文件。
+本篇教程将教你如何从零开始搭建一个 GraphQL 服务，所以，你要做的第一件是就是创建一个目录来容纳服务所需的所有文件。
 
 打开终端，导航到你选择放置文件夹的地址然后运行如下命令：
 
@@ -25,7 +25,7 @@ yarn init -y
 
 ## 创建一个最原始的 GraphQL 服务
 
-有了项目目录文件，你就可以继续了 —— 创建 GraphQL 服务的入口。这是一个名为 index.js 的文件，位置在 src 目录下。
+有了项目目录文件，你就可以继续了，下一步是创建 GraphQL 服务的入口。这是一个名为 index.js 的文件，位置在 src 目录下。
 
 在终端，创建 src 目录然后创建空文件 index.js：
 
@@ -34,9 +34,9 @@ mkdir src
 touch src/index.js
 ```
 
-执行 hackernews-node 目录下的 node src/index.js 就可以启动 app。但是目前什么也不会发生，因为 index.js 是一个空文件 ¯\_(ツ)_/¯（皮）
+在 hackernews-node 目录执行 node src/index.js 就可以启动 app。但是目前什么也不会发生，因为 index.js 是一个空文件 `¯\_(ツ)_/¯`（皮）
 
-现在我们来开始建造这个 GraphQL 服务吧！要做的第一件事就是 —— 给项目添加一个依赖。
+现在我们来开始建造这个 GraphQL 服务吧！要做的第一件事就是给项目添加一个依赖。
 
 在终端执行：
 
@@ -50,16 +50,16 @@ graphql-yoga 是一个全功能的 GraphQL 服务。它基于 Express.js 和一�
 
 * GraphQL 规格兼容
 * 支持文件上传
-* GraphQL subscriptions 实时功能
+* 实时 GraphQL 订阅功能
 * 支持 TypeScript 类型
-* 支持 GraphQL Playground 的开箱即用
+* 支持开箱即用的 GraphQL Playground
 * 可通过 Express 中间件扩展
 * 在 GraphQL schema 中可处理自定义指令
 * 查询性能追踪
 * 可接受两种 content-type：application/json 和 application/graphql
 * 可以在各种环境下运行：可以通过 now, up, AWS Lambda, Heroku 等等部署
 
-完美，现在来写一写代码吧 🙋
+完美，现在来写一写代码吧。
 
 打开 src/index.js 然后输入如下代码：
 
@@ -102,13 +102,13 @@ server.start(() => console.log(`Server is running on http://localhost:4000`))
 
 在项目的根目录下，运行如下命令：
 
-```
+```sh
 node src/index.js
 ```
 
 正如终端输出所示，服务现在运行在 http://localhost:4000。为了测试服务的 API，打开浏览器然后导航到这个地址。
 
-你看到的是一个 GraphQL Playground，一个强大的 GraphQL IDE，可以让你以一种交互的方式测试 API 能力。
+你看到的是一个 GraphQL Playground，一个强大的 GraphQL IDE，可以让你以交互的方式测试 API 能力。
 
 点击右侧的 SCHEMA 按钮，你可以看到 API 文档。这个文档是根据你定义的 schema 自动生成的，能够显示 schema 所有的 API 操作和数据类型。
 
@@ -152,9 +152,9 @@ GraphQL schema 是所有 GraphQL API 的核心，我们来快速的介绍一下�
 
 > 注：本篇教程就简单介绍一下 schema 的浅层知识。如果你想要深入了解 schema 和它在 API 中的角色，看看[这篇文章](https://blog.graph.cool/graphql-server-basics-the-schema-ac5e2950214e)吧.
 
-GraphQL schemas 的写作语法是 GraphQL Schema Definition Language（SDL）。SDL 是一个类型系统，允许定义数据结构（正如其他强类型语言 Java, TypeScript, Swift, Go 一样）。
+GraphQL schemas 的写作语法是 GraphQL Schema Definition Language（SDL）。SDL 有一个类型系统，它允许定义数据结构（正如其他强类型语言 Java, TypeScript, Swift, Go 一样）。
 
-这对 GraphQL 服务的 API 定义有什么帮助呢？所有的 GraphQL schema 都有三个特别的 root 类型：Query, Mutation 和 Subscription。root 类型分别负责三种 GraphQL 提供的操作类型：queries，mutations 和 subscriptions。root 类型下的字段被称为 root field，他们定义了可用的 API 操作。
+这对 GraphQL 服务的 API 定义有什么帮助呢？所有的 GraphQL schema 都有三个特别的基础类型：Query, Mutation 和 Subscription。这几个基础类型分别负责 GraphQL 提供的三种操作类型：queries，mutations 和 subscriptions。基础类型下的字段被称为根字段（root field），他们定义了可用的 API 操作。
 
 例如，刚才我们使用的那个最简单的 GraphQL schema：
 
@@ -164,7 +164,7 @@ type Query {
 }
 ```
 
-这个 schema 仅有一个 root field，名字是 info。当发送 queries, mutations 或者 subscriptions 给 GraphQL API 的时候，必须要以一个 root field 来开始。这里我们仅有一个 root field，所以 API 就只接受一种 query。
+这个 schema 仅有一个根字段，名字是 info。当发送 queries, mutations 或者 subscriptions 给 GraphQL API 的时候，必须要以一个根字段开始解析。这里我们仅有一个根字段，所以 API 就只接受一种 query。
 
 我们来看一个稍微复杂一点的例子：
 
@@ -184,9 +184,9 @@ type User {
 }
 ```
 
-这个例子中，我们有了三个 root fields：Query 下有 users 和 user，Mutation 下有 createUser。另外还定义了 User 类型，否则 schema 的类型定义将不完整。（因为 Query 和 Mutation 中都用到了 User 类型）
+这个例子中，我们有了三个根字段：Query 下有 users 和 user，Mutation 下有 createUser。另外还定义了 User 类型，否则 schema 的类型定义将不完整。（因为 Query 和 Mutation 中都用到了 User 类型）
 
-从这个 schema 的定义中，可以派生出什么样的 API 操作呢？我们知道所有的 API 操作都必须以 root field 开始。但是我们还没有学过当 root field 本身的类型是另一个引用数据类型的时候，API 操作应该是什么样子。在这个例子中，root field 的类型分别是 [User!]!, User 和 User!。在前面的 info 的例子中，root field 的类型是 String，这是一个 [scalar type](http://graphql.org/learn/schema/#scalar-types)。
+这样的 schema 的定义，可以支持什么样的 API 操作呢？我们知道所有的 API 操作都必须以根字段开始。但是这里，根字段本身的类型是另一个引用数据类型的时候，那么此时 API 操作应该是什么样子呢？在这个例子中，根字段的类型分别是 [User!]!, User 和 User!。在前面的 info 的例子中，根字段的类型是 String，它是一个 [scalar type](http://graphql.org/learn/schema/#scalar-types)。
 
 当 root field 是一个引用类型，你需要用这个引用类型的字段来继续扩展 query（或者 mutation/subscription）。这些扩展的部分称为：selection set。
 
@@ -220,16 +220,16 @@ mutation {
 
 有几点需要注意的是：
 
-* 在这个例子中，我们对需要返回的 User 类型请求了 id 和 name。实际上，我们可以省略 id, name 的其中一个（也就是仅请求 id 或 name）。注意，当请求一个引用类型（object type）的数据时，需要至少请求 selection set 中的一个字段。
+* 在这个例子中，我们请求了 User 类型的 id 和 name。实际上，我们可以省略 id, name 的其中一个（也就是仅请求 id 或 name）。注意，当请求一个引用类型（object type）的数据时，需要至少请求可选字段中的一个。
 
-* 对于 selection set 中的字段，root field 的类型是 required（!） 或者 list 都可以。在上面这个 schema 的例子中，三个 root field 都有不同的 User 类型的 type modifiers（也就是 required 和 list 的不同组合）：
+* 对于 selection set 中的字段，根字段的类型是 required（!） 或者 list 都可以。在上面这个 schema 的例子中，三个根字段都有不同的 User 类型的 type modifiers（也就是 required 和 list 的不同组合）：
 
   * 对于 users 字段，返回值是 [User!]!，意味着它返回的是一个 User 类型元素的 list 列表（该字段本身不能为空）。列表中也不能包含 null 元素。所以，你总能对数据接收方保证，该字段下它们不会收到 null，并且列表中也不会包含空元素。
 
-  * 对于 user(id: ID!) 字段，返回类型是 User 意味着可能是 null（没写 ! 所以可能为 null）或者是一个 User 类型的对象。
+  * 对于 user(id: ID!) 字段，返回类型是 User 意味着可能是 null 或者是一个 User 类型的对象。
 
-  * 对于 createUser(name: String!) 字段，返回类型是 User! 意味着必须返回 User 类型对象。
+  * 对于 createUser(name: String!) 字段，返回类型是 User!，意味着必须返回 User 类型对象。
 
-好了～理论知识够多了，让我们继续写写代码吧！（续下篇）
+好了～理论知识讲得差不多了，我们来写写代码吧！
 
 [self Proofreading +1]
