@@ -9,7 +9,7 @@
 
 ## 概览
 
-在后台技术中，GraphQL 可以算一颗新星。它作为一个 API 设计规范，可以替代 REST，正逐渐成为用来暴露服务器数据和功能的新标准。
+在后台技术中，GraphQL 可以算一颗冉冉升起的新星。它作为一个 API 设计规范，可以替代 REST，正逐渐成为用来暴露服务器数据和功能的新标准。
 
 在本教程中，你将会从零学习如何完整建立一个一般的 GraphQL 服务。我们将会用到如下技术：
 
@@ -21,15 +21,15 @@
 
 * GraphQL bindings：处理 GraphQL API 的简便方法。binding 可以为每个 API 操作生成专用的 JavaScript 函数。
 
-* GraphQL Playground：它是 “GraphQL IDE”，允许通过发送请求和修改操作来互动测试 GraphQL API 的功能。有点像 Postman 测试 REST APIs。除了其他一些事项，GraphQL Playground 还：
+* GraphQL Playground：它是 “GraphQL IDE”，允许通过发送请求和修改操作来互动测试 GraphQL API 的功能。有点像 Postman 测试 REST APIs。除了其他事项外，GraphQL Playground 还可以：
 
   * 自动生成所有可用 API 操作的一份很全面的文档。
   * 提供了一个编辑器，你可以在里面写入 queries，mutations，subscriptions，同时还有自动填充和语法高亮。
   * 允许你方便的共享 API 操作。
 
-## 期望
+## 目标
 
-本教程的目的是为黑客新闻的克隆版创建一个 API。以下是本教程中期望的内容的简要说明。
+本教程的目的是为前端应用 Hacker News 的克隆版创建一个 API。以下是本教程目标内容的简要说明。
 
 你将从学习 GraphQL 服务如何运行的基础开始学习，包括定义服务的 GraphQL schema 以及编写相关的 resolver 函数。一开始的时候，这些 resolver 将只处理内存中保存的数组 - 所以在服务停止运行的时候数据都不存在了。
 
