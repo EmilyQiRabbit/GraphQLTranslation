@@ -3,13 +3,13 @@
 > * 译者：[旺财](https://github.com/EmilyQiRabbit)
 > * **Proofreading is welcomed** 🙋 🎉
 
-# 一个简单的 Mutation
+# Mutation 基础
 
-这一部分你将会学习如何为 GraphQL API 添加一个 mutation。这个 mutation 的功能是允许以 post 方法在服务端添加一个新的 link。
+这一部分你将会学习如何为 GraphQL API 添加 mutation。这个 mutation 将允许客户端发起 post 方法在服务端添加一个新的 link。
 
 ## 扩展 schema
 
-和以前一样，首先需要在 GraphQL schema 定义中添加一个新的操作。
+和以前一样，首先需要在 GraphQL schema 定义中添加一种新的操作。
 
 在 index.js 中，添加类型定义：
 
@@ -32,7 +32,7 @@ type Link {
 `
 ```
 
-这时候，其实 schema 的定义代码已经变得有些长了。我们来稍微重构下代码，吧 schema 放到一个单独的文件中：
+这时候，其实定义 schema 的代码已经变得有些长了。我们来重构一下代码，把 schema 放到一个单独的文件中：
 
 在 src 目录新建一个文件并命名为 schema.graphql：
 
@@ -70,11 +70,11 @@ const server = new GraphQLServer({
 })
 ```
 
-很方便的一点是，GraphQLServer 实例化参数中，typeDefs 可以像之前一样用一个字符串来提供，或者也可以用一个包含 schema 定义的文件来提供。
+很方便的一点是，GraphQLServer 实例化参数中的 typeDefs 可以像之前一样是一个字符串，或者也可以是一个包含 schema 定义的文件。
 
 ## 实现 resolver 函数
 
-为 API 添加新的功能的下一步就是为新的 field 实现 resolver 函数。
+下一步就是实现新字段的 resolver 函数。
 
 更新 resolver 函数：
 
@@ -106,7 +106,7 @@ const resolvers = {
 }
 ```
 
-首先，注意到我们已经移除了 Link resolver，我们并不需要他们，因为 GraphQL 服务能够推断出 Link 的结构。
+首先，注意到我们已经移除了 Link 的 resolver 函数，我们并不需要他们，因为 GraphQL 服务能够推断出 Link 的结构。
 
 下面我们按照注释的数字逐个讲解：
 
@@ -116,7 +116,7 @@ const resolvers = {
 
 现在，我们正好可以讨论下，resolver 函数的第二个参数 args。
 
-这个参数携带了操作的参数：在这个例子中就是 Link 的 url 和 description。在之前的 resolver 中，我们并不需要它，因为相应的字段没有在 schema 的定义中指定任何参数。
+这个参数携带了操作的参数：在这个例子中就是 Link 的 url 和 description。在之前的 resolver 中，我们并不需要它，因为相应的字段没有在 schema 定义中指定任何参数。
 
 ## 测试 mutation
 
@@ -147,7 +147,7 @@ mutation {
 
 随着发送次数的增加，idCount 也增加，返回的 id 将会变成 link-2, link-3...
 
-问了验证 mutation 成功运行了，你可以发送 seed 请求，服务将会返回所有你用 mutation 创建的 link。
+为了验证 mutation 成功运行了，你可以发送 feed 请求，服务将会返回所有你用 mutation 创建的 link。
 
 但是，当你重启服务后，之前你添加的 link 就都没有了，因为这些 link 就仅在服务运行时存在于内存中。在下一节中，你将会学习如何为 GraphQL 服务添加数据库层，这样你就能持久化你的变量了。
 
