@@ -169,3 +169,5 @@ type Mutation {
   deleteLink(id: ID!): Link
 }
 ```
+
+[self Proofreading +1]
