@@ -5,7 +5,7 @@
 
 # 添加数据库
 
-在这一部分，你将会建立起 Prisma 服务以及服务连接的数据库。
+在这一部分，你将会建立 Prisma 服务和数据库连接。
 
 ## 为什么选择 Prisma
 
@@ -13,7 +13,7 @@
 
 接下来，构建 GraphQL 服务的难点在哪里呢？
 
-在实际应用中，你可能会遇到很多情境：这些情境下，resolver 的实现可能会非常复杂。尤其是 GraphQL 的请求可能会有很深的嵌套、那么 resolver 的实现可能就会比较 tricky，也容易导致性能问题。
+在实际应用中，你可能会遇到很多情境，这些情境下，resolver 的实现可能会非常复杂。尤其是当 GraphQL 的请求有很深的嵌套、那么 resolver 的实现可能就会比较 tricky，也容易导致性能问题。
 
 大多数时候，你经常还需要考虑其他很多附加的工作流，比如认证、权限、分页、过滤操作、实时和第三方的服务或者遗留的服务整合等等。
 
@@ -23,9 +23,9 @@
 
 2. 使用 ORM（Object-relational mapping），它可以提供数据库摘要，让你能够直接从代码中访问。
 
-第一个方案是存在问题的，因为在 resolver 中直接处理 SQL 非常复杂，很容易就会把代码搞得难以维护。另一个问题是，SQL 请求经常是以字符串的形式提交到数据库。字符串没有任何结构可言，它们就是一系列字符。所以，你的工具没办法帮你发现代码中可能的错误，也没办法提供像自动填充这样的附加功能。那么这样，写 SQL 语句就非常棘手、非常容易出错。
+第一个方案是存在问题的，因为在 resolver 中直接处理 SQL 非常复杂，很容易导致代码难以维护。另一个问题是，SQL 请求经常是以字符串的形式提交到数据库。字符串没有任何结构可言，它们就是一系列字符。所以，你的工具没办法帮你发现代码中可能的错误，也没办法提供像自动填充这样的附加功能。那么这样，写 SQL 语句就非常棘手、非常容易出错。
 
-第二个方案使用了 ORM，可能你会觉得是个不错的选择。但是，这个方案也有致命缺点。ORMs 通常存在这样的问题：它是实现相对简单的数据库访问的解决方案，但是由于 GraphQL 查询的复杂性以及可能出现的各种边界情况，所以使用 GraphQL 时就无法正常工作了。
+第二个方案使用了 ORM，可能你会觉得是个不错的选择。但是，这个方案也存在缺点。ORMs 通常存在这样的问题：它实现相对简单的数据库访问是可选的解决方案，但是由于 GraphQL 查询的复杂性以及可能出现的各种边界情况，此时 ORM 就无法正常工作了。
 
 Prisma 提供了 GraphQL 查询引擎来专门处理 resolve 请求，从而解决了这个问题。当使用 Prisma 的时候，解析器的运行，其实只是将传入的查询委托给底层的 Prisma 引擎。多亏了 Prisma bindings，请求委托将会是一个很简单的过程，所有的 resolver 都可以用一行代码就实现。
 
@@ -47,9 +47,9 @@ Prisma 提供了 GraphQL 查询引擎来专门处理 resolve 请求，从而解�
 
 ### 数据库层
 
-第二个 GraphQL API 是 Prisma 提供的，它提供了数据库层。这个基本上就是一个基于 GraphQL 的数据库接口，帮你省去了写 SQL 的繁琐。那么，这个 GraphQL API 长什么样子呢？
+第二个 GraphQL API 是 Prisma 提供的，它提供了数据库层。这个基本上就是一个基于 GraphQL 的数据库接口，帮你省去了写 SQL 的繁琐。那么，这个 GraphQL API 是什么样子呢？
 
-Prisma API 是一个镜像数据库 API，所以它允许你对特定数据类型进行增删改查的操作。什么是数据类型？这将取决于你 - 你可以用你很熟悉的 SDL 定义这些数据类型。后面你将会学习它是如何工作的。
+Prisma API 是一个镜像数据库 API，所以它允许你对特定数据类型进行增删改查的操作。什么数据类型将取决于你 - 你可以用你很熟悉的 SDL 定义这些数据类型。后面你将会学习它是如何工作的。
 
 通常情况下，这些数据类型代表了你应用的实体。比如，你正在搭建一个汽车经销商软件，那你就可能会有 Car, CarDealer, Customer 这样的数据类型。所有这样的数据类型的集合就是你的数据模型。
 
@@ -113,14 +113,13 @@ touch database/prisma.yml
 touch database/datamodel.graphql
 ```
 
-prisma.yml 是你的 Prisma 数据库服务的主要配置文件。
-另一方面，datamodel.graphql 则包含了数据模型的定义，它将会是 Prisma 生成 GraphQL CRUD API 的基础。
+prisma.yml 是你的 Prisma 数据库服务的主要配置文件。datamodel.graphql 则包含了数据模型的定义，它将会是 Prisma 生成 GraphQL CRUD API 的基础。
 
 目前位置，你的 Hacker News app 的数据模型可能只包含一种数据类型：Link。事实上，你可以直接把 Link 的定义从 schema.graphql 拷贝到 datamodel.graphql。
 
 打开 datamodel.graphql 并添加如下代码：
 
-```
+```js
 type Link {
   id: ID! @unique
   createdAt: DateTime!
@@ -140,11 +139,8 @@ type Link {
 添加如下的内容：
 
 ```
-# The service name, this will be part of the endpoint of the Prisma API
-service: hackernews-node
-
-# The deployment stage, this will also be part of the API endpoint
-stage: dev
+# The HTTP endpoint for your Prisma API
+endpoint: ''
 
 # Points to the file that holds your data model
 datamodel: datamodel.graphql
@@ -157,9 +153,9 @@ secret: mysecret123
 
 这里是关于上面这个文件的快速解析：
 
-* service：选一个你认为合适的服务名。
+* endpoint：Prisma API 的 HTTP 接口。在部署时需要。当部署的时候将会生成。
 
-* stage：用于区分服务不同的部署阶段，它的值可以是任意字符串，不过一般都是：dev，staging 或者 prod。
+* datamodel：指出数据模型的位置，它是 Prisma 增删改查接口的基础。
 
 * secret：为了保护你的 Prisma 服务，要求对 Prisma 发起的请求都必须需要做认证。这个 secret 用来签署 JWTs，它需要被包含在向 Prisma 发起的 HTTP 请求的 Authorization 头部。[阅读这里](https://www.prisma.io/docs/reference/prisma-api/concepts-utee3eiquo/#authentication)了解更多。
 
@@ -168,14 +164,18 @@ secret: mysecret123
 在终端运行如下命令
 
 ```
-yarn global add prisma@1.6.3
+yarn global add prisma
 ```
 
 好了～现在你终于准备好可以部署你的 Prisma 服务了，同时你将连接到数据库。
 
 在 database 目录下运行 prisma deploy。
 
-命令将会指示你选择一个 cluster 用于部署 Prisma 服务。本教程中你将会使用 development cluster，它是完全免费的。
+命令将会引导一段交互过程：
+
+1. 首先选择 Demo server。在弹出的浏览器中使用 Prisma Cloud 注册然后回到控制台。
+
+2. 然后需要选择 demo server 的区域。然后你可以直接按回车来使用服务推荐的配置值。
 
 > Prisma 是开源的，它基于 Docker，意味着你可以部署在你选择的任何一个云服务上。如果你不想要处理 DevOps 和 Docker 的手工配置，你也可以使用 Prisma Cloud 来运行一个私人的 cluster 用于部署服务。具体可以查看这段[视频](https://www.youtube.com/watch?v=jELE4KXJPn4)。
 
