@@ -3,9 +3,9 @@
 > * 译者：[旺财](https://github.com/EmilyQiRabbit)
 > * **Proofreading is welcomed** 🙋 🎉
 
-# 用 Prisma Binding 链接服务和数据库
+# 用 Prisma Bindings 连接服务和数据库
 
-在这一章，你将学到如何连接 GraphQL 服务和提供数据库接口的 Prisma 数据库服务。连接是通过 Prisma Binding 完成的。
+在这一章，你将学习如何使用能提供数据库接口的 Prisma 数据库服务来连接 GraphQL 服务。连接是通过 Prisma Binding 完成的。
 
 ## 更新 resolver 函数以使用 Prisma Binding
 
@@ -44,7 +44,7 @@ const resolvers = {
 
 之前的 feed resolver 没有任何参数 -- 但是现在参数有四个了。事实上，前两个参数并不需要，需要的是 context 和 info。
 
-还记得我们之前说过的：所有的 GraphQL resolver 函数都会接受四个参数。现在我们也知道了后两个 -- 但是它们是用来做什么吗的呢？
+还记得我们之前说过的：所有的 GraphQL resolver 函数都会接受四个参数。现在我们也知道了后两个 -- 但是它们是用来做什么的呢？
 
 context 参数是一个 JS 对象，resolver 链上的所有 resolver 都能对它进行读出和写入操作 -- 因此它也就基本上成为了 resolver 之间数据交流的方法。你将会看到，当 GraphQL 服务本身被初始化的时候，context 就可以被写入了。所以，这也是你可以传递任意的数据或者方法给所有 resolvers 的方法。在这个例子中，你将会为 context 绑定 db 对象.
 
@@ -58,7 +58,7 @@ info 对象携带着 GraphQL 请求的信息（格式为 [query AST](https://med
 
 现在你对 resolver 的参数有了一个基本的了解，我们来看看它们在 resolver 函数中将会如何被应用吧。
 
-### 理解 feed resolver
+### 理解 feed resolver 函数
 
 feed resolver 的实现：
 
@@ -68,9 +68,9 @@ feed: (root, args, context, info) => {
 },
 ```
 
-它获取了 context 上的 db 对象。你将会看到，db 对象实际上就是一个来自  prisma-binding NPM 包的 Prisma binding 实例。
+它获取了 context 上的 db 对象。你将会看到，db 对象实际上就是一个来自 prisma-binding NPM 包的 Prisma binding 实例。
 
-这个 Prisma binding 实例可以高效的吧 Prisma 数据库 schema 转化为你可以调用的 JS 函数。当调用这样的方法的时候，Prisma binding 实例将会自动为你组装一个 GraphQL 请求然后发送给 Prisma API。那么，你传递给 links 函数的两个参数都是什么呢？
+这个 Prisma binding 实例可以高效的吧 Prisma 数据库 schema 转化为你可以调用的 JS 函数。当调用这样的函数的时候，Prisma binding 实例将会自动为你组装一个 GraphQL 请求然后发送给 Prisma API。那么，你传递给 links 函数的两个参数都是什么呢？
 
 第一个参数携带了你想要和 query 一同提交的参数。由于目前对于 link 的请求不需要任何参数，直接传递一个空对象即可。
 
@@ -101,7 +101,7 @@ query {
 }
 ```
 
-### 理解 post resolver
+### 理解 post resolver 函数
 
 post resolver 如下：
 
@@ -120,7 +120,7 @@ post: (root, args, context, info) => {
 
 之前说过的，实际上，Prisma binding 实例会将 Prisma 数据库 schema 转化为你可以用 js 调用的方法。调用这些方法将会发起相应的 query/mutation 给 Prisma API。
 
-在这个例子中，你在 Prisma 的 GraphQL schema 发起了 createLink mutation。并将 resolvers 收到的数据通过 args 参数作为函数的参数传递给 Prisma API。
+在这个例子中，你从 Prisma 的 GraphQL schema 发起了 createLink mutation。并将 resolvers 收到的数据通过 args 参数作为函数的参数传递给 Prisma API。
 
 而 info 参数则和上面的例子一样，包含了 mutation 的选择集，它仍然可以用一个 string 来代替：
 
@@ -156,7 +156,7 @@ mutation {
 
 ## 创建 Prisma binding 实例
 
-在其他步骤之前，先做所有开发者都最喜欢的步骤：为项目添加一个新的依赖（???）
+在其他步骤之前，先做所有 JS 开发者都最喜欢的（=。=）步骤：为项目添加一个新的依赖。
 
 > 在项目的根目录下，运行如下命令
 
@@ -184,7 +184,7 @@ const server = new GraphQLServer({
 })
 ```
 
-这是诀窍：你用如下的信息实例化了 Prisma：
+你用如下的信息实例化了 Prisma：
 
 * typeDefs：它指向 Prisma 数据库 schema，它定义了 Prisma 的完整 CRUD GraphQL API。注意，此时你实际上还没有这个文件 - 我们稍后将会告诉你如何得到它。
 
@@ -245,7 +245,31 @@ projects:
 
 Prisma CLI 也会使用 .graphqlconfig.yml 提供的信息。因此，你可以在根目录下运行 prisma 命令，而不是在 database 地址下了。
 
-在项目的根目录下，运行 prisma deploy 来下载 Prisma 数据库 schema 到本地，具体地址是在 .graphqlconfig.yml 中定义了。
+下面，更新 prisma.yml 来增加一个部署钩子信息：
+
+```yml
+endpoint: `https://eu1.prisma.sh/public-graytracker-771/hackernews-node/dev
+datamodel: datamodel.graphql
+
+# Deploy hook
+hooks:
+  post-deploy:
+    - graphql get-schema --project database
+```
+
+当 Prisma 部署完成后，部署钩子将被启动。这里，我们希望使用 get-schema 命令来下载 schema，并只想配置在 .graphqlconfig.yml 的数据库项目。
+
+这个 graphql 命令行工具需要安装一下：
+
+```sh
+yarn global add graphql-cli
+```
+
+下面，可以部署项目了，在根目录下运行：
+
+```
+prisma deploy
+```
 
 观察命令的输出，你可以看到它打印了如下一行：
 
