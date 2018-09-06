@@ -467,3 +467,5 @@ module.exports = {
 ```
 
 一切就绪，下面可以开始测试 newVote 订阅功能了。
+
+[self Proofreading +1]

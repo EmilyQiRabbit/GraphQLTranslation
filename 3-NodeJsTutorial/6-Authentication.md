@@ -5,7 +5,7 @@
 
 # 认证
 
-这个模块将会实现注册和登陆的功能，用户就可以被 GraphQL 服务认证了。
+本篇教程将会实现注册和登录，用户可以通过 GraphQL 服务认证了。
 
 ## 在数据 modal 中添加 User 类型
 
@@ -73,9 +73,9 @@ type User {
 }
 ```
 
-所以，注册和登录 mutation 行为其实非常类似。两者都返回注册（或登录）用户的信息和一个 token 信息，它可以用来认证后续的对 API 的请求。这个信息捆绑在 AuthPayload 类型中。
+注册和登录 mutation 行为其实非常类似。两者都返回注册（或登录）用户的信息和一个 token 信息，它可以用来认证后续的对 API 的请求。这个信息捆绑在 AuthPayload 类型中。
 
-但是，等一下。为什么你现在又一次定义了 User 类型？类型不能从 Prisma 数据库的 schema 中导入吗？答案是当然可以！
+等一下？为什么你现在又一次定义了 User 类型？类型不能从 Prisma 数据库的 schema 中导入吗？答案是当然可以！
 
 但是，在这个例子中，你重新定义 User 来在 App schema 中隐藏它的部分信息。比如，密码字段（正如你将会看到的：你将会用哈希版本来保存密码——所以，即使它在这里暴露出来，客户也无法直接查询它）。
 
@@ -108,7 +108,7 @@ module.exports = {
 }
 ```
 
-很简洁明了。就只是将之前同样的函数移动到了专门、各自的文件中。接下来是 Mutation resolver。
+很简洁明了，就只是将之前同样的函数移动到了各自专门的文件中。接下来是 Mutation resolver。
 
 打开 Mutation.js 文件然后添加 login 和 signup resolver 函数（post resolver 稍后再添加）：
 
@@ -172,7 +172,7 @@ module.exports = {
 
 现在来看 login mutation：
 
-1. 这次不是创建用户，而是用 Prisma 的绑定实例来根据 login mutation 一同发送来的 email 信息查找已经存在的用户记录。如果没有发现同样的用户邮箱，就返回一个相关的错误/注意到，这次你将会同时在 selection set 中加入 id 和 password。密码当然是必须的，因为你需要用它和 login mutation 发来的密码做比对。
+1. 这次不是创建用户，而是用 Prisma 的绑定实例来根据 login mutation 一同发送来的 email 信息查找已经存在的用户记录。如果没有发现同样的用户邮箱，就返回一个相关的错误。注意到，这次你将会同时在 selection set 中加入 id 和 password。密码当然是必须的，因为你需要用它和 login mutation 发来的密码做比对。
 
 2. 下一步就是比较 mutation 提供的密码以及存储在数据库中的密码。如果两者不匹配，也需要返回错误。
 
