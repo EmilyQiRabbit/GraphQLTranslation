@@ -5,7 +5,7 @@
 
 # 实时 GraphQL 订阅
 
-在这一章节种，你将会学习如何通过实现 GraphQL subscriptions 为应用加入实时更新的功能。目标是实现两个 GraphQL 服务暴露出来的的订阅功能：
+在这一章节中，你将会学习如何通过实现 GraphQL subscriptions 为应用加入实时更新的功能。目标是通过 GraphQL 服务实现两个暴露给外部的的的订阅功能：
 
 * 当一个新的 Link 被创建的时候为订阅用户推送实时更新。
 
@@ -13,7 +13,7 @@
 
 ## 什么是 GraphQL subscriptions？
 
-订阅（subscriptions）是 GraphQL 的一个功能，它允许服务器在发生某些特定事件的时候，向客户端发送数据。订阅功能常常使用 WebSockets 实现。本篇配置中，服务器和参与订阅的客户端维持了一个持续的连接。它打破了“请求-回复”这样的之前所有 API 交互的模式。
+订阅（subscriptions）是 GraphQL 的一项功能，它允许服务器在发生某些特定事件的时候，向客户端推送数据。订阅功能常常使用 WebSockets 实现。本篇配置中，服务器和参与订阅的客户端维持了一个持续的连接。它打破了“请求-回复”这样的之前所有 API 交互的模式。
 
 ## 使用 Prisma 的订阅
 
@@ -197,11 +197,11 @@ description: A great website
 
 ## 订阅新建 Link 元素
 
-停止纸上谈兵，我们来写一写代码：实现一个允许客户端订阅新 Link 被创建信息的订阅函数。
+下面，我们来写一写代码：实现一个允许客户端订阅新 Link 被创建信息的订阅函数。
 
 就和 query 和 mutation 一样，第一步是去扩充 GraphQL schema 的定义。
 
-打开 schema 并添加 Subscription 类型：
+打开应用的 schema 并添加 Subscription 类型：
 
 ```js
 type Subscription {
