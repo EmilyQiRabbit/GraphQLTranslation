@@ -1,7 +1,7 @@
 > * 原文地址：[More Mutations and Updating the Store](https://www.howtographql.com/react-apollo/6-more-mutations-and-updating-the-store/)
 > * 译文来自：[Github:EmilyQiRabbit](https://github.com/EmilyQiRabbit/GraphQLTranslation)
-> * 译者：[旺财](https://github.com/EmilyQiRabbit)
-> * **Proofreading is welcomed** 🙋 🎉
+> * 译者：[Yuqi🌸](https://github.com/EmilyQiRabbit)
+> * **欢迎校对** 🙋‍♀️🎉
 
 # 更多 mutation 请求的实例，以及 store 的更新
 

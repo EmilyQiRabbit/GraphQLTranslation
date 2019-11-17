@@ -1,7 +1,7 @@
 > * 原文地址：[A Simple Query](https://www.howtographql.com/graphql-js/2-a-simple-query/)
 > * 译文来自：[Github:EmilyQiRabbit](https://github.com/EmilyQiRabbit/GraphQLTranslation)
-> * 译者：[旺财](https://github.com/EmilyQiRabbit)
-> * **Proofreading is welcomed** 🙋 🎉
+> * 译者：[Yuqi🌸](https://github.com/EmilyQiRabbit)
+> * **欢迎校对** 🙋‍♀️🎉
 
 # Query 基础
 

@@ -1,7 +1,7 @@
 > * 原文地址：[Adding a Database](https://www.howtographql.com/graphql-js/4-adding-a-database/)
 > * 译文来自：[Github:EmilyQiRabbit](https://github.com/EmilyQiRabbit/GraphQLTranslation)
-> * 译者：[旺财](https://github.com/EmilyQiRabbit)
-> * **Proofreading is welcomed** 🙋 🎉
+> * 译者：[Yuqi🌸](https://github.com/EmilyQiRabbit)
+> * **欢迎校对** 🙋‍♀️🎉
 
 # 添加数据库
 

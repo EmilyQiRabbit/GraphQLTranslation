@@ -1,9 +1,9 @@
 > * 原文地址：[Basics Tutorial - Introduction](https://www.howtographql.com/basics/0-introduction/)
 > * 译文来自：[Github:EmilyQiRabbit](https://github.com/EmilyQiRabbit/GraphQLTranslation)
-> * 译者：[旺财](https://github.com/EmilyQiRabbit)
-> * **Proofreading is welcomed** 🙋 🎉
+> * 译者：[Yuqi🌸](https://github.com/EmilyQiRabbit)
+> * **欢迎校对** 🙋‍♀️🎉
 
-# 基础教学 - GraphQL 简介
+# 基础教程 - GraphQL 简介
 
 GraphQL 是一个新的接口规范，它是 REST 的更加高效、更加强大、更加灵活的取代者。它由 Facebook 开发并开源。现在它由一个大社区来维护，社区成员是来自全世界的个人和公司。
 
