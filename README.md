@@ -13,3 +13,6 @@ Translated By Yuqi 🌸
   * [GraphQL 是更好的 REST](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/0-BasicTutorial/1-GraphQL-is-the-better-REST.md)
   * [核心概念](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/0-BasicTutorial/2-Core-Concepts.md)
   * [架构](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/0-BasicTutorial/3-Big-Picture-Architecture.md)
+* 高级教程
+  * [客户端](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/1-AdvancedTutorial/0-Clients.md)
+  * [服务端](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/1-AdvancedTutorial/1-Server.md)
