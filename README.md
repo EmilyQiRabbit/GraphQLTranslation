@@ -1,5 +1,11 @@
 # [GraphQL](https://www.howtographql.com/basics/0-introduction/) 中文：一份向着标准版和专业版努力的翻译
 
+目前完成翻译的章节仅包括：
+
+1. graphql 基础概念
+2. 前端 React + Apollo
+3. 后端 graphql + node
+
 [test 文件中 react-apollo 的相关源码戳这里!](https://github.com/howtographql/react-apollo)
 
 Translated By Yuqi 🌸
