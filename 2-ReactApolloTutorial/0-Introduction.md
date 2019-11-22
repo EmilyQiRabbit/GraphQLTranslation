@@ -43,5 +43,3 @@
 ## Apollo vs Relay
 
 ...待续...
-
-[self Proofreading +1]
