@@ -3,15 +3,15 @@
 > * 译者：[Yuqi🌸](https://github.com/EmilyQiRabbit)
 > * **欢迎校对** 🙋‍♀️🎉
 
-# More GraphQL Concepts
+# 更多 GraphQL 概念
 
-# Enhancing Reusability with Fragments
+## 使用 fragment 增强可复用性
 
-Fragments are a handy feature to help to improve the structure and reusability of your GraphQL code. A fragment is a collection of fields on a specific type.
+fragment 是可以帮助你优化 GraphQL 代码结构和可复用性的一个很方便的特性。fragment 是一个特殊类型字段的集合。
 
-Let’s assume we have the following type:
+假设我们有如下这样的类型：
 
-```JavaScript
+```graphql
 type User {
   name: String!
   age: Int!
@@ -22,9 +22,9 @@ type User {
 }
 ```
 
-Here, we could represent all the information that relates to the user’s physical address into a fragment:
+这里，我们在一个 fragment 中包含了代表用户所有地理位置相关的信息：
 
-```JavaScript
+```graphql
 fragment addressDetails on User {
   name
   street
@@ -33,9 +33,9 @@ fragment addressDetails on User {
 }
 ```
 
-Now, when writing a query to access the address information of a user, we can use the following syntax to refer to the fragment and save the work to actually spell out the four fields:
+现在，当需要写一个用来请求用户地址信息的 query 的时候，我们就可以使用如下这样的语法，它引用了之前的 fragment，节约了再次拼写那 4 个字段的时间：
 
-```JavaScript
+```graphql
 {
   allUsers {
     ... addressDetails
@@ -43,9 +43,9 @@ Now, when writing a query to access the address information of a user, we can us
 }
 ```
 
-This query is equivalent to writing:
+这两种写法是等价的：
 
-```JavaScript
+```graphql
 {
   allUsers {
     name
@@ -56,13 +56,13 @@ This query is equivalent to writing:
 }
 ```
 
-## Parameterizing Fields with Arguments
+## 参数化字段
 
-In GraphQL type definitions, each field can take zero or more arguments. Similar to arguments that are passed into functions in typed programming languages, each argument needs to have a name and a type. In GraphQL, it’s also possible to specify default values for arguments.
+在 GraphQL 的类型定义中，每个字段都可以带 0 到多个参数。和其他强类型编程语法中，传递入函数的参数很类似，每个参数都需要定义参数名和参数类型。在 GraphQL 中，也可以指定参数的默认值。
 
-As an example, let’s consider a part of the schema that we saw in the beginning:
+例如，让我们一起考虑开头那个 schema 的这一部分：
 
-```JavaScript
+```graphql
 type Query {
   allUsers: [User!]!
 }
@@ -73,17 +73,17 @@ type User {
 }
 ```
 
-We could now add an argument to the allUsers field that allows us to pass an argument to filter users and include only those above a certain age. We also specify a default value so that by default all users will be returned:
+我们可以为 allUsers 字段增加一个参数，这个参数让我们可以以年龄为条件过滤用户。我们也可以规定一个默认值，这样在默认情况下，所有的用户都会被返回：
 
-```JavaScript
+```graphql
 type Query {
   allUsers(olderThan: Int = -1): [User!]!
 }
 ```
 
-This olderThan argument can now be passed into the query using the following syntax:
+这个 olderThan 参数可以以这样的格式传递给 query：
 
-```JavaScript
+```graphql
 {
   allUsers(olderThan: 30) {
     name
@@ -92,11 +92,11 @@ This olderThan argument can now be passed into the query using the following syn
 }
 ```
 
-## Named Query Results with Aliases
+## 使用别名命名 query 请求的结果
 
-One of GraphQL’s major strengths is that it lets you send multiple queries in a single request. However, since the response data is shaped after the structure of the fields being requested, you might run into naming issues when you’re sending multiple queries asking for the same fields:
+GraphQL 的最强大的地方之一在于，你能够在一次请求中发送多个 query。但是，既然服务端返回的数据和发送请求的字段结构是保持一致的，那么当你发送多个请求相同字段的 query 的时候，你也许就可能遇到命名相关的问题：
 
-```JavaScript
+```graphql
 {
   User(id: "1") {
     name
@@ -107,9 +107,9 @@ One of GraphQL’s major strengths is that it lets you send multiple queries in 
 }
 ```
 
-In fact, this will produce an error with a GraphQL server, since it’s the same field but different arguments. The only way to send a query like that would be to use aliases, i.e. specifying names for the query results:
+事实上，由于相同的字段使用了不同的参数，这会在 GraphQL 服务中造成错误。想要这样发送多个 query 的唯一方法就是使用别名，例如，为 query 的结果指定不同的名字：
 
-```JavaScript
+```graphql
 {
   first: User(id: "1") {
     name
@@ -120,9 +120,9 @@ In fact, this will produce an error with a GraphQL server, since it’s the same
 }
 ```
 
-In the result, the server would now name each User object according to the specified alias:
+结果就是，在服务端返回的结果中，将会根据指定的别名为每个 User 对象命名：
 
-```JavaScript
+```graphql
 {
   "first": {
     "name": "Alice"
@@ -133,25 +133,25 @@ In the result, the server would now name each User object according to the speci
 }
 ```
 
-## Advanced SDL
+## 高级 SDL（即 Schema Definition Language）
 
-The SDL offers a couple of language features that weren’t discussed in the previous chapter. In the following, we’ll discuss those by practical examples.
+SDL 提供了很多语言特性，有很多我们在前文中都并没有提到过。接下来，我们将会一起通过实例讨论它们：
 
-### Object & Scalar Types
+### object 和 scalar 类型
 
-In GraphQL, there are two different kinds of types.
+在 GraphQL 中，有两种不同的类型：
 
-* Scalar types represent concrete units of data. The GraphQL spec has five predefined scalars: as String, Int, Float, Boolean, and ID.
+* scalar 类型代表了具体的数据单元。GraphQL 规定有五种预定义的 scalar，即 String、Int、Float、Boolean 和 ID。
 
-* Object types have fields that express the properties of that type and are composable. Examples of object types are the User or Post types we saw in the previous section.
+* object 类型可以有多个字段，用来描述该类型的属性，同时它们也是可组合的。我们在前面的章节中看到的 User 和 Post 类型就是 object 类型的例子。
 
-In every GraphQL schema, you can define your own scalar and object types. An often cited example for a custom scalar would be a Date type where the implementation needs to define how that type is validated, serialized, and deserialized.
+在每个 GraphQL 服务的 schema 中都可以定义你自己的 scalar 和 object 类型。一个经常被引用的用户自定义 scalar 类型就是 Date 类型，它的实现需要定义如何验证、序列化和反序列化该类型。
 
-### Enums
+### enums 类型
 
-GraphQL allows you to define enumerations types (short enums), a language feature to express the semantics of a type that has a fixed set of values. We could thus define a type called Weekday to represent all the days of a week:
+GraphQL 允许定义枚举类型，简写为 enums，这种语言特性可以描述有一系列固定值的类型。由此，我们可以定义一个 Weekday 类型，来代表一周内的每一天：
 
-```JavaScript
+```graphql
 enum Weekday {
   MONDAY
   TUESDAY
@@ -163,13 +163,13 @@ enum Weekday {
 }
 ```
 
-Note that technically enums are special kinds of scalar types.
+注意，从技术上来说，enums 属于特殊类型的 scalar 类型。
 
-### Interface
+### interface 类型
 
-An interface can be used to describe a type in an abstract way. It allows you to specify a set of fields that any concrete type, which implements this interface, needs to have. In many GraphQL schemas, every type is required to have an id field. Using interfaces, this requirement can be expressed by defining an interface with this field and then making sure that all custom types implement it:
+使用 interface，我们可以以很抽象的方式描述类型。它让你能定义一系列任意类型字段的集合，所有实现了这个接口的类型，都必须要包含这些字段。在很多 GraphQL schema 中，所有类型都必须有一个 id 字段。如果使用 interface，这个需求就可以通过定义一个包含 id 字段的 interface 来描述，并保证所有用户定义的类型都要实现这个接口：
 
-```JavaScript
+```graphql
 interface Node {
   id: ID!
 }
@@ -181,11 +181,11 @@ type User implements Node {
 }
 ```
 
-### Union Types
+### union 类型
 
-Union types can be used to express that a type should be either of a collection of other types. They are best understood by means of an example. Let’s consider the following types:
+union 类型可以用来描述，一个类型属于其他类型集合中的一个。最好的理解方式还是通过举例子。我们假设有如下类型：
 
-```JavaScript
+```graphql
 type Adult {
   name: String!
   work: String!
@@ -197,17 +197,17 @@ type Child {
 }
 ```
 
-Now, we could define a Person type to be the union of Adult and Child:
+现在，我们定义一个 Person 类型，它是 Adult 和 Child 的 union 类型：
 
-```JavaScript
- union Person = Adult | Child
+```graphql
+union Person = Adult | Child
 ```
 
-This brings up a different problem: In a GraphQL query where we ask to retrieve information about a Child but only have a Person type to work with, how do we know whether we can actually access this field?
+这就造成了另外一个问题：我们在一个 GraphQL query 中，请求一个 Child 类型的信息，但我们目前只有 Person 类型可以使用，我们该如何知道我们真的可以访问属于 Child 的字段呢？
 
-The answer to this is called conditional fragments:
+问题的答案，我们称之为条件 fragment：
 
-```JavaScript
+```graphql
 {
   allPersons {
     name # works for `Adult` and `Child`
