@@ -3,35 +3,35 @@
 > * 译者：[Yuqi🌸](https://github.com/EmilyQiRabbit)
 > * **欢迎校对** 🙋‍♀️🎉
 
-# Security
+# 安全性
 
-GraphQL gives enormous power to clients. But with great power come great responsibilities 🕷.
+GraphQL 赋予了客户端更强的能力。但是能力越大，意味着越有可能造成 bug。
 
-Since clients have the possibility to craft very complex queries, our servers must be ready to handle them properly. These queries may be abusive queries from evil clients, or may simply be very large queries used by legitimate clients. In both of these cases, the client can potentially take your GraphQL server down.
+由于客户端可能发送非常复杂的请求，那么服务端就必须做好充分的准备适当的处理它们。但这些请求可能是来自非法终端的无效请求或恶意请求，或者可能只是用于合法用户的大开销请求。这两种情况下，客户端都有可能让 GraphQL 服务端出现问题。
 
-There are a few strategies to mitigate these risks. We will cover them in this chapter in order from the simplest to the most complex, and look at their pros and cons.
+GraphQL 中有一些可以降低风险的策略。我们会在本章中按照从简到繁的顺序逐个介绍它们以及它们各自的利弊。
 
-## Timeout
+## 超时策略
 
-The first strategy and the simplest one is using a timeout to defend against large queries. This strategy is the simplest since it does not require the server to know anything about the incoming queries. All the server knows is the maximum time allowed for a query.
+第一个也是最简单的策略就是使用时间限制来抵御大开销的请求。由于这个策略不需要服务端知道任何关于传入的请求的信息，所以它最容易实现。服务端所需要的信息就是一个请求允许的最大时间限制。
 
-For example, a server configured with a 5 seconds timeout would stop the execution of any query that is taking more than 5 seconds to execute.
+例如，服务器可以配置一个 5 秒的超时时间，并将会终止执行任何执行时间超过 5 秒的请求。
 
-### Timeout Pros
+### 超时策略的优势
 
-* Simple to implement.
-* Most strategies will still use a timeout as a final protection.
+* 容易实现。
+* 大多数的策略还是会使用超时策略作为最后的保护措施。
 
-### Timeout Cons
+### 超时策略的不足
 
-* Damage can already be done even when the timeout kicks in.
-* Sometimes hard to implement. Cutting connections after a certain time may result in strange behaviours.
+* 超时后终止实行可能会造成错误。
+* 有时候也会难以实现。因为在特定时间后就终止连接可能会导致服务端或客户端奇怪的行为。
 
-## Maximum Query Depth
+## 最大请求嵌套深度策略
 
-As we covered earlier, clients using GraphQL may craft any complex query they want. Since GraphQL schemas are often cyclic graphs, this means a client could craft a query like this one:
+正如我们之前提到的，使用了 GraphQL 的客户端可能会根据需要发起非常复杂的请求。而 GraphQL schema 通常是一个有环图的结构，那就意味着客户端有可能发起如下这样的请求：
 
-```
+```graphql
 query IAmEvil {
   author(id: "abc") {
     posts {
@@ -40,7 +40,7 @@ query IAmEvil {
           author {
             posts {
               author {
-                # that could go on as deep as the client wants!
+                # 这样可以嵌套无穷层！
               }
             }
           }
@@ -51,17 +51,17 @@ query IAmEvil {
 }
 ```
 
-What if we could prevent clients from abusing query depth like this? Knowing your schema might give you an idea of how deep a legitimate query can go. This is actually possible to implement and is often called Maximum Query Depth.
+我们如何才能防止客户端发起这样嵌套很深的无效查询呢？如果你对 schema 很了解，那么你应该知道合法请求的嵌套深度是多少。这是可以实现的，这种方式称为最大请求嵌套深度策略。
 
-By analyzing the query document’s abstract syntax tree (AST), a GraphQL server is able to reject or accept a request based on its depth.
+通过分析请求文档的抽象语法树（abstract syntax tree，即 AST），GraphQL 服务端可以根据请求嵌套的深度选择拒绝或接受。
 
-Take for example a server configured with a Maximum Query Depth of 3, and the following query document. Everything within the red marker is considered too deep and the query is invalid.
+例如，某服务端配置了最大请求嵌套深度为 3。那么在下图表示的请求文档中，红框标注的部分就被视为嵌套过深，该请求就是无效的了。
 
-image...
+[image](../imgs/graphqlpic10.png)
 
-Using graphql-ruby with the max query depth setting, we get the following result:
+如果使用 graphql-ruby 并限制了最大请求嵌套深度，我们将会得到如下结果：
 
-```
+```graphql
 {
   "errors": [
     {
@@ -71,74 +71,71 @@ Using graphql-ruby with the max query depth setting, we get the following result
 }
 ```
 
-### Maximum Query Depth Pros
+### 最大请求嵌套深度策略的优势
 
-* Since the AST of the document is analyzed statically, the query does not even execute, which adds no load on your GraphQL server.
+* 由于文档的最大请求嵌套深度是静态分析的，那么不符合要求的请求根本没有被执行，也就不会对 GraphQL 服务增加任何负载。
 
-### Maximum Query Depth Cons
+### 最大请求嵌套深度策略的不足
 
-* Depth alone is often not enough to cover all abusive queries. For example, a query requesting an enormous amount of nodes on the root will be very expensive but unlikely to be blocked by a query depth analyzer.
+* 仅依靠嵌套深度并不足以过滤掉所有的无效请求。例如，如果向服务请求根结点下很大数量的节点也会造成巨大的开销，但是它可能并不会由于嵌套深度分析而被阻挡住。
 
-### Query Complexity
+### 请求复杂度策略
 
-Sometimes, the depth of a query is not enough to truly know how large or expensive a GraphQL query will be. In a lot of cases, certain fields in our schema are known to be more complex to compute than others.
+有时候请求的嵌套深度不足以真正反映出这个 GraphQL 的大小或开销是多少。很多情况下，我们可以确定解析 schema 中的某些特定字段会比其他的要更复杂。
 
-Query complexity allows you to define how complex these fields are, and to restrict queries with a maximum complexity. The idea is to define how complex each field is by using a simple number. A common default is to give each field a complexity of 1. Take this query for example:
+使用请求复杂度策略，你可以定义这些字段的复杂度，并限制请求的最大复杂度。思路就是用一个数字来定义字段复杂度。人们经常会默认将每个字段复杂度设置为 1。例如如下这个请求：
 
-```
+```graphql
 query {
-  author(id: "abc") { # complexity: 1
-    posts {           # complexity: 1
-      title           # complexity: 1
+  author(id: "abc") { # 复杂度：1
+    posts {           # 复杂度：1
+      title           # 复杂度：1
     }
   }
 }
 ```
 
-A simple addition gives us a total of 3 for the complexity of this query. If we were to set a max complexity of 2 on our schema, this query would fail.
+只需要简单的将每个字段的复杂度相加，可以得出整个请求的复杂度为 3。如果在 schema 中我们设定了最大复杂度是 2，那么这个请求就会失败。
 
-What if the posts field is actually much more complex than the author field? We can set a different complexity to the field. We can even set a different complexity depending on arguments! Let’s take a look at a similar query, where posts has a variable complexity depending on its arguments:
+如果实际上 posts 字段要比 author 字段复杂呢？那么我们可以为该字段设置一个不同的复杂度。我们甚至可以根据参数来配置不同的复杂度！我们看如下这个和上文很类似的 query，这里的 posts 根据参数调整了复杂度：
 
-```
+```graphql
 query {
-  author(id: "abc") {    # complexity: 1
-    posts(first: 5) {    # complexity: 5
-      title              # complexity: 1
-    }
+  author(id: "abc") {    # 复杂度：1
+    posts(first: 5) {    # 复杂度：5
+      title              # 复杂度：1
   }
 }
 ```
 
-### Query Complexity Pros
+### 请求复杂度策略的优势
 
-* Covers more cases than a simple query depth.
-* Reject queries before executing them by statically analyzing the complexity.
+* 比简单的靠请求嵌套深度来过滤请求要更全面。
+* 通过静态分析复杂度，能在真正执行请求之前就判断是否拒绝它们。
 
+### 请求复杂度策略的不足
 
-### Query Complexity Cons
+* 难以实现。
+* 如果复杂度是由开发者估计的，那么我们应该怎么更新它们呢？我们如何能在第一时间就知道字段的开销呢？
+* mutation 请求的复杂度很难估计。如果 mutation 有难以评估的副作用怎么办？例如它可能需要排队执行一个后台任务？
 
-* Hard to implement perfectly.
-* If complexity is estimated by developers, how do we keep it up to date? How do we find the costs in the first place?
-* Mutations are hard to estimate. What if they have a side effect that is hard to measure, like queuing a background job?
+## 节流策略
 
+到目前为止我们看到的这些方法，都可以有效的阻止恶意或者无效的请求把服务搞崩溃。但使用这些方法的问题是，它们能有效的阻止开销很大的请求，却无法阻止客户端短时内高频的发起小请求。
 
-## Throttling
+在大多数 API 中，都会使用一个简单的节流策略来防止客户端请求频率过高。GraphQL 比较特别的一点就是，节流请求的数量其实并没有什么帮助。即使是不多的请求，如果它们开销都很大，那么对于服务来说可能也会吃不消的。
 
-The solutions we’ve seen so far are great to stop abusive queries from taking your servers down. The problem with using them alone like this is that they will stop large queries, but won’t stop clients that are making a lot of medium sized queries!
+事实上，因为请求都是在客户端定义的，所以我们并不知道请求的数量是多少才是可以接受的。所以我们怎样才能对客户端节流呢？
 
-In most APIs, a simple throttle is used to stop clients from requesting resources too often. GraphQL is a bit special because throttling on the number of requests does not really help us. Even a few queries might be too much if they are very large.
+### 基于服务时间的节流策略
 
-In fact, we have no idea what amount of requests is acceptable since they are defined by the clients. So what can we use to throttle clients?
+预估请求开销的一个很好的方法，就是依据服务端完成这个请求所需要的时间。以此为启发我们可以节流请求。在对你的系统比较了解的前提下，你可以规定客户端在特定时间内可用的最大服务时长。
 
-### Throttling Based on Server Time
+我们还可以决策，随着时间的推移，客户端可以增加多少服务时长。这是一个经典的漏斗算法。注意：其实还有很多可选的节流算法，但是本章我们就不讨论了。在下面的例子中，我们就使用漏斗算法。
 
-A good estimate of how expensive a query is the server time it needs to complete. We can use this heuristic to throttle queries. With a good knowledge of your system, you can come up with a maximum server time a client can use over a certain time frame.
+我们假设最大可允许的服务时长（即漏斗体积）是 1000ms，服务端可以每秒钟可赢取 100ms（即漏斗速度）的服务时间，同时如下这个 mutation：
 
-We also decide on how much server time is added to a client over time. This is a classic leaky bucket algorithm. Note that there are other throttling algorithms out there, but they are out of scope for this chapter. We will use a leaky bucket throttle in the next examples.
-
-Let’s imagine our maximum server time (Bucket Size) allowed is set to 1000ms, that clients gain 100ms of server time per second (Leak Rate) and this mutation:
-
-```
+```graphql
 mutation {
   createPost(input: { title: "GraphQL Security" }) {
     post {
@@ -148,44 +145,44 @@ mutation {
 }
 ```
 
-takes on average 200ms to complete. In reality, the time may vary but we’ll assume it always takes 200ms to complete for the sake of this example.
+平均需要 200ms 才能完成执行。实际上，执行时间可能会变化，但在这个例子中，为了计算方便，我们就假设它总是需要 200ms 来完成。
 
-It means that a client calling this operation more than 5 times within 1 second would be blocked until more available server time is added to the client.
+这就意味着，如果一个客户端每秒钟执行超过 5 次该 mutation，就会被节流策略阻止，此时它就需要等待，直到获得更多可用的服务时长。
 
-After two seconds (100ms is added by second), our client could call the createPost a single time.
+两秒钟之后（每秒可增加 100ms 的服务时长），这个客户端就又可以请求一次 createPost 了。
 
-As you can see, throttling based on time is a great way to throttle GraphQL queries since complex queries will end up consuming more time meaning you can call them less often, and smaller queries may be called more often since they will be very fast to compute.
+如你所见，基于时间的节流是节制 GraphQL 请求的很好方式，它意味着复杂的、需要花费很长时间的请求就只能低频率的发送，而开销小、花费时间短的请求则可以以更高的频率发送。
 
-It can be good to express these throttling constraints to clients if your GraphQL API is public. In that case, server time is not always the easiest thing to express to clients, and clients cannot really estimate what time their queries will take without trying them first.
+如果你的 GraphQL API 是公开的，那么最好将这种节流限制告知用户。服务时长并不总是一个很容易传达给客户的概念，并且在真正尝试发送请求之前，客户也不太容易估计出他们的请求需要花费的时间。
 
-Remember the Max Complexity we talked about earlier? What if we throttled based on that instead?
+还记得我们之前提到的最大请求复杂度策略吗？如果我们的节流是基于此的会如何呢？
 
-### Throttling Based on Query Complexity
+### 基于请求复杂度的节流策略
 
-Throttling based on Query Complexity is a great way to work with clients and help them respect the limits of your schema.
+基于请求复杂度的节流策略是一种很好的和客户端协同运作的方式，它可以帮助客户端遵守 schema 的限制。
 
-Let’s use the same complexity example we used in the Query Complexity section:
+我们使用在请求复杂度策略那一节中一样的例子：
 
-```
+```graphql
 query {
-  author(id: "abc") {    # complexity: 1
-    posts {              # complexity: 1
-      title              # complexity: 1
+  author(id: "abc") {    # 复杂度：1
+    posts {              # 复杂度：1
+      title              # 复杂度：1
     }
   }
 }
 ```
 
-We know that this query has a cost 3 based on complexity. Just like a time throttle, we can come up with a maximum cost (Bucket Size) per time a client can use.
+我们知道这个 query 请求的复杂度是 3。和时长节流策略一样，我们可以限制客户端在一定时间内可用的最大复杂度。
 
-With a maximum cost of 9, our clients could run this query only three times, before the leak rate forbids them to query more.
+如果这个最大复杂度开销是 9，那么在再次获取到可用复杂度之前，客户端就只允许发送这个请求 3 次。
 
-The principles are the same as our time throttle, but now communicating these limits to clients is much nicer. Clients can even calculate the costs of their queries themselves without needing to estimate server time!
+基于复杂度的规则和基于时长的节流规则是一样的，但是我们却更容易和客户端讲明这种限制。客户端也能自己计算出请求的复杂度开销，而不需要估算请求耗费的服务时长了。
 
-The GitHub public API actually uses this approach to throttle their clients. Take a look at how they express these limits to users: https://developer.github.com/v4/guides/resource-limitations/.
+实际上，GitHub 公开 API 就是使用这种方法来节流的。可以看看他们是如何向用户说明这种限制的：https://developer.github.com/v4/guides/resource-limitations/。
 
-## Summary
+## 总结
 
-GraphQL is great to use for clients because it gives them so much more power. But that power also gives them the possibility to abuse your GraphQL server with very expensive queries.
+由于 GraphQL 给了客户端更强的能力，因此对于客户端来说它是很好的选择。但是由于客户端有了更强的能力，也就意味着它更有可能向服务端发送开销很大的请求。
 
-There are many approaches to secure your GraphQL server against these queries, but none of them is bullet proof. It’s important to know what options are available and know their limits so we take the best decisions!
+上文包括了很多种保护 GraphQL 服务免受这些请求损害的策略，但它们都不是完美的。但是了解有哪些方法是可行的以及它们的不足是非常重要的，这将帮助我们作出最佳的决策。
