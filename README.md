@@ -22,3 +22,6 @@ Translated By Yuqi 🌸
 * 高级教程
   * [客户端](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/1-AdvancedTutorial/0-Clients.md)
   * [服务端](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/1-AdvancedTutorial/1-Server.md)
+  * [更多 GraphQL 概念](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/1-AdvancedTutorial/2-More-GraphQL-Concepts.md)
+  * [GraphQL 工具和生态圈](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/1-AdvancedTutorial/3-Tooling-and-Ecosystem.md)
+  * [安全性](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/1-AdvancedTutorial/4-Security.md)
