@@ -1,4 +1,4 @@
-> * 原文地址：[Server](https://www.howtographql.com/advanced/1-server/)
+> * 原文地址：[More GraphQL Concepts](https://www.howtographql.com/advanced/2-more-graphql-concepts/)
 > * 译文来自：[Github:EmilyQiRabbit](https://github.com/EmilyQiRabbit/GraphQLTranslation)
 > * 译者：[Yuqi🌸](https://github.com/EmilyQiRabbit)
 > * **欢迎校对** 🙋‍♀️🎉

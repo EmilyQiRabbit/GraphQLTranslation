@@ -1,4 +1,4 @@
-> * 原文地址：[Server](https://www.howtographql.com/advanced/1-server/)
+> * 原文地址：[Security](https://www.howtographql.com/advanced/4-security/)
 > * 译文来自：[Github:EmilyQiRabbit](https://github.com/EmilyQiRabbit/GraphQLTranslation)
 > * 译者：[Yuqi🌸](https://github.com/EmilyQiRabbit)
 > * **欢迎校对** 🙋‍♀️🎉

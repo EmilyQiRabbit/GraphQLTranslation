@@ -1,4 +1,4 @@
-> * 原文地址：[Server](https://www.howtographql.com/advanced/1-server/)
+> * 原文地址：[Tooling and Ecosystem](https://www.howtographql.com/advanced/3-tooling-and-ecosystem/)
 > * 译文来自：[Github:EmilyQiRabbit](https://github.com/EmilyQiRabbit/GraphQLTranslation)
 > * 译者：[Yuqi🌸](https://github.com/EmilyQiRabbit)
 > * **欢迎校对** 🙋‍♀️🎉
