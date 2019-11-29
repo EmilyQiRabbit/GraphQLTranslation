@@ -25,3 +25,4 @@ Translated By Yuqi 🌸
   * [更多 GraphQL 概念](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/1-AdvancedTutorial/2-More-GraphQL-Concepts.md)
   * [GraphQL 工具和生态圈](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/1-AdvancedTutorial/3-Tooling-and-Ecosystem.md)
   * [安全性](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/1-AdvancedTutorial/4-Security.md)
+  * [常见问题](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/1-AdvancedTutorial/5-Common-Questions.md)

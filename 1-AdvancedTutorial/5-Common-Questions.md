@@ -3,60 +3,53 @@
 > * 译者：[Yuqi🌸](https://github.com/EmilyQiRabbit)
 > * **欢迎校对** 🙋‍♀️🎉
 
-# Common Questions
 # 常见问题
 
-## Is GraphQL a Database Technology?
 ## GraphQL 是一种数据库技术吗？
 
-No. GraphQL is often confused with being a database technology. This is a misconception, GraphQL is a query language for APIs - not databases. In that sense it’s database agnostic and can be used with any kind of database or even no database at all.
+非也。人们常常会把 GraphQL 和数据库技术搞混在一起。这绝对是一个错误的观念，GraphQL 是一种 API 请求语言 —— 而不是数据库语言。所以说，其实它可以和任何数据库配合使用，甚至是没有数据库都可以。
 
-## Is GraphQL only for React / Javascript Developers?
 ## GraphQL 只适用于 React 或 Javascript 开发者吗？
 
-No. GraphQL is an API technology so it can be used in any context where an API is required.
+非也。GraphQL 是一种 API 技术，所以它可以应用于任何需要 API 的场景。
 
-On the backend, a GraphQL server can be implemented in any programming language that can be used to build a web server. Next to Javascript, there are popular reference implementations for Ruby, Python, Scala, Java, Clojure, Go and .NET.
+后端的 GraphQL 服务可以使用任何能构建 web 服务的语言实现。除了 Javascript，还有很流行的基于 Ruby、Python、Scala、Java、Clojure、Go 和 .NET 的实现方式。
 
-Since a GraphQL API is usually operated over HTTP, any client that can speak HTTP is able to query data from a GraphQL server.
+由于 GraphQL API 通常要通过 HTTP 进行操作，所以任何能与 HTTP 交互的客户端都可以从 GraphQL 服务请求数据。
 
-> Note: GraphQL is actually transport layer agnostic, so you could choose protocols other than HTTP to implement your server.
+> 注意：实际上 GraphQL 可以和任何传输层配合使用，所以你也可以选择 HTTP 之外的协议来实现服务。
 
-## How to do Server-side Caching?
 ## 如何做服务端缓存？
 
-One common concern with GraphQL, especially when comparing it to REST, are the difficulties to maintain server-side cache. With REST, it’s easy to cache the data for each endpoint, since it’s sure that the structure of the data will not change.
+当我们把 GraphQL 和 REST 做对比的时候，一个很常见的顾虑就是 GraphQL 难以维护服务端缓存。而如果是使用 REST，由于接口数据结构不会改变，所以为每个接口缓存数据是非常容易的。
 
-With GraphQL on the other hand, it’s not clear what a client will request next, so putting a caching layer right behind the API doesn’t make a lot of sense.
+而如果使用了 GraphQL，我们并不知道客户端下一个请求是什么结构，所以为 API 配置一个缓存层其实没有必要。
 
-Server-side caching still is a challenge with GraphQL. More info about caching can be found on the GraphQL website.
+服务端缓存现在仍旧是 GraphQL 的一大挑战。更多关于此的信息可以在 [GraphQL 官网](https://graphql.org/learn/caching/)查看。
 
-## How to do Authentication and Authorization?
-## 如何做认证和授权？
+## 如何认证和授权？
 
-Authentication and authorization are often confused. Authentication describes the process of claiming an identity. That’s what you do when you log in to a service with a username and password, you authenticate yourself. Authorization on the other hand describes permission rules that specify the access rights of individual users and user groups to certain parts of the system.
+认证和授权的概念经常被混淆。认证描述的是身份声明的过程。当你使用用户名和密码登录服务的时候，就是认证自身的过程。另一方面，授权则描述的是权限规则，这些规则表明了用户和群组是否有权利获取系统特定的功能。
 
-Authentication in GraphQL can be implemented with common patterns such as OAuth.
+GraphQL 的认证可以使用例如 OAuth 这样的通用模式实现。
 
-To implement authorization, it is recommended to delegate any data access logic to the business logic layer and not handle it directly in the GraphQL implementation. If you want to have some inspiration on how to implement authorization, you can take a look to Graphcool’s permission rules.
+而关于授权的实现，[官方建议](https://graphql.org/learn/authorization/)是将所有的数据访问逻辑都委托给业务逻辑层，而不要在 GraphQL 的实现中直接处理。如果你想要了解更多关于授权的实现，可以看看 [Graphcool 的权限规则](https://www.graph.cool/docs/reference/auth/overview-ohs4aek0pe)。
 
-## How to do Error Handling?
 ## 如何处理错误？
 
-A successful GraphQL query is supposed to return a JSON object with a root field called "data". If the request fails or partially fails (e.g. because the user requesting the data doesn’t have the right access permissions), a second root field called "errors" is added to the response:
+一个成功的 GraphQL 请求应当返回一个根字段名为“data”的 JSON 对象。而如果请求失败或者是部分失败了（例如，用户没有权限获取这部分数据），那么在返回值中会有第二个名为“errors”的根结点：
 
-```
+```graphql
  {
   "data": { ... },
   "errors": [ ... ]
 }
 ```
 
-For more details, you can refer to the GraphQL specification.
+更多内容可以参见 [GraphQL 规范](https://graphql.github.io/graphql-spec/)。
 
-## Does GraphQL Support Offline Usage?
 ## GraphQL 支持离线使用吗？
 
-GraphQL is a query language for (web) APIs, and in that sense by definition only works online. However, offline support on the client-side is a valid concern. The caching abilities of Relay and Apollo might already be enough for some use cases, but there isn’t a popular solution for actually persisting stored data yet. You can gain some more insights in the GitHub issues of Relay and Apollo where offline support is discussed.
+GraphQL 是用于网络 API 的语言，从这个定义的角度来说它仅支持在线使用。但是，客户端对离线使用的支持也是必须考虑的。Relay 和 Apollo 的缓存功能可能已经足够这些场景使用了，但是目前还并没有一个流行的解决方案能在本地永久保存数据。你可以在 GitHub 上找到关于 Relay 和 Apollo 并且在讨论离线支持的 issue 来获取更多信息。
 
-> One interesting approach for offline usage and persistence can be found here.
+> [这里](http://www.east5th.co/blog/2017/07/24/offline-graphql-queries-with-redux-offline-and-apollo/)介绍了一个关于离线应用和持久化的很有趣的方法。
