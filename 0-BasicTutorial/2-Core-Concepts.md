@@ -7,9 +7,9 @@
 
 在这一章，我们将会一起学习 GraphQL 的一些基础语言结构。包括定义类型的语法，以及发送查询和修改请求的语法。我们也为你准备了一个沙箱环境，它基于 [graphql-up](https://www.npmjs.com/package/graphql-up)，可以用来测试你学习到的代码。
 
-## schema 定义语言：即 SDL，Schema Definition Language
+## 模式定义语言：即 Schema Definition Language，SDL
 
-GraphQL 有一套自己的类型系统，可以用来定义 API 的框架（即 schema）。用来写框架的语法就称为 Schema Definition Language (SDL)。
+GraphQL 有一套自己的类型系统，可以用来定义 API 的模式（即 schema）。用来写框架的语法就称为模式定义语言（即 Schema Definition Language，SDL）。
 
 下面是一个简单的例子，我们可以用 SDL 定义一个 `Person` 类型：
 
@@ -108,7 +108,7 @@ GraphQL 的一个最大的优点就是：它原生支持查询的信息嵌套。
 
 ### 带参数的 query
 
-在 GraphQL 的 query 中，每个字段都可以携带零到多个参数，但要求这些参数是 schema 中定义过或者支持的。例如，根字段 `allPersons` 可以携带一个 `last` 参数，定义返回的用户个数。相应的 query 就可以这样写：
+在 GraphQL 的 query 中，每个字段都可以携带零到多个参数，但要求这些参数是在模式（schema）中定义过或者支持的。例如，根字段 `allPersons` 可以携带一个 `last` 参数，定义返回的用户个数。相应的 query 就可以这样写：
 
 ```JavaScript
 {
@@ -198,13 +198,13 @@ subscription {
 }
 ```
 
-## 定义 schema
+## 定义一个模式（schema）
 
-现在我们已经了解了 query，mutation 和 subscription 的基础知识，我们在心中总结一下，然后学习如何写 schema，正是由于 schema，服务端才能允许你执行刚才所有的这些代码。
+现在我们已经了解了 query，mutation 和 subscription 的基础知识。我们来总结一下，然后学习如何写模式。正是由于有了模式，服务端才能允许你执行刚才所有的这些代码。
 
-schema 是使用 GraphQL API 时需要懂得的最重要的概念，它定义了 API 功能，也定义了客户端应该如何请求数据。它通常被视作服务端和客户端之间的协议。
+模式是使用 GraphQL API 时需要懂得的最重要的概念，它定义了 API 功能，也定义了客户端应该如何请求数据。它通常被视作服务端和客户端之间的协议。
 
-通常情况下，schema 就是 GraphQL 类型的集合。但是，当为 API 写 schema 的时候，首先需要一些特定的根类型（root type）：
+通常情况下，模式就是 GraphQL 类型的集合。但是，当为 API 写模式文件的时候，首先需要一些特定的根类型（root type）：
 
 ```JavaScript
 type Query { ... }
@@ -246,7 +246,7 @@ type Subscription {
 }
 ```
 
-最后，我们把所有代码都放在一起，本章所有用来支持 query 和 mutation 的**完整的** schema 就是：
+最后，我们把所有代码都放在一起，本章所有用来支持 query 和 mutation 的**完整的**模式就是：
 
 ```JavaScript
 type Query {

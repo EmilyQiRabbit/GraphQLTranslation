@@ -9,7 +9,7 @@
 
 ## GraphQL 的执行
 
-GraphQL 不仅指定了描述 schema 的方法和从这些 schema 获取数据的 query 语言，它实际是一套可执行算法，用来规定如何将 query 转化为最终的数据结果。算法核心其实很简单：通过执行字段对应的 resolver，逐个转化 query 的每个字段。假设我们有如下的 schema：
+GraphQL 不仅指定了描述模式的方法，以及从这些模式获取数据的一种请求语言，它实际是一套可执行算法，用来规定如何将请求转化为最终的数据结果。算法核心其实很简单：通过执行字段对应的 resolver 函数，逐个转化请求的每个字段。假设我们有如下的模式：
 
 ```JavaScript
 type Query {
@@ -26,7 +26,7 @@ type Post {
 }
 ```
 
-基于这个 schema，我们可以向服务端发送如下这样的 query：
+基于这样的模式，我们可以向服务端发送如下这样的 query：
 
 ```JavaScript
 query {
@@ -39,7 +39,7 @@ query {
 }
 ```
 
-可以看出，query 中每个字段都属于特定的 schema 中的类型：
+可以看出，这个 query 中每个字段都属于特定的类型：
 
 ```JavaScript
 query: Query {

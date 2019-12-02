@@ -240,11 +240,20 @@ serviceWorker.unregister();
 curl https://codeload.github.com/howtographql/react-apollo/tar.gz/starter | tar -xz --strip=1 react-apollo-starter/server
 ```
 
->如果你使用的是 windows 系统，你需要安装 [Git CLI](https://git-scm.com) 来避免 curl 命令可能有的坑。
+> 如果你使用的是 Windows 系统，你需要安装 [Git CLI](https://git-scm.com) 来避免 curl 命令可能有的坑。
 
-现在在文件中可以看到一个新的 server 文件，这里面包含了所有你需要的后端代码。
+现在在文件中可以看到一个新的 server 目录，这里面包含了所有你需要的后端代码。
 
-代码的解释这里就不详述了，就将安装过程写一下，后面的 Node 教程会对这里进行详细解说。
+在启动服务前，我们快速了解一下后端服务中主要的组件：
+
+* prisma：这个目录保存了与 [Prisma](https://www.prisma.io) 配置有关的文件。在 GraphQL resolver 中，Prisma 客户端用来和数据库交互（和 ORM，即“对象关系映射”类似）。
+  * prisma.yml 是 Prisma 项目的根配置文件。
+  * datamodel.prisma 定义了 GraphQL 模式定义语言（即 SDL）中的数据模型。当你使用 Prisma 的时候，数据模型可以用来描述数据库中的模式。
+* src：这个目录保存了 GraphQL 服务的文件。
+  * schema.graphql 包括了你的应用模式。应用模式定义了你可以在前端发送的 GraphQL 操作。稍后我们会深入分析这个文件。
+  * generated/prisma-client 包含了自动生成的 Prisma 客户端，是一个类型安全的数据库访问库（类似于 ORM）。
+  * resolvers 包含了定义在应用模式里的 resolver 函数，用于解析 GraphQL 操作。
+  * index.js 是 GraphQL 服务的入口。
 
 ### 部署 Prisma 数据库服务
 
