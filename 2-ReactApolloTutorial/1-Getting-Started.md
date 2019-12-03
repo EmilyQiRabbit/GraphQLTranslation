@@ -255,11 +255,101 @@ curl https://codeload.github.com/howtographql/react-apollo/tar.gz/starter | tar 
   * resolvers 包含了定义在应用模式里的 resolver 函数，用于解析 GraphQL 操作。
   * index.js 是 GraphQL 服务的入口。
 
+在上面提到的这些文件中，前端研发者只需要关心定义在 server/src/schema.graphql 里的应用模式。这个文件里包含了 GraphQL 模式，它定义了所有能从前端应用发送的操作（即 queriy，mutation 和 subscription）。
+
+这个文件中的代码如下：
+
+```graphql
+# import Link, Vote, LinkSubscriptionPayload, VoteSubscriptionPayload from "./generated/prisma.graphql"
+
+type Query {
+  feed(filter: String, skip: Int, first: Int, orderBy: LinkOrderByInput): Feed!
+}
+
+type Feed {
+  links: [Link!]!
+  count: Int!
+}
+
+type Mutation {
+  post(url: String!, description: String!): Link!
+  signup(email: String!, password: String!, name: String!): AuthPayload
+  login(email: String!, password: String!): AuthPayload
+  vote(linkId: ID!): Vote
+}
+
+type AuthPayload {
+  token: String
+  user: User
+}
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+}
+
+type Subscription {
+  newLink: LinkSubscriptionPayload
+  newVote: VoteSubscriptionPayload
+}
+```
+
+该模式支持如下的操作：
+
+* Queriy：
+  * feed：从后端取回所有的新闻链接，同时支持过滤参数、排序和分页。
+
+* Mutation：
+  * post：登录了的用户可以创建新的新闻链接
+  * signup：为新用户创建账号
+  * login：已注册用户登录
+  * vote：支持以登录的用户为喜欢的新闻链接点赞/帮顶
+
+* Subscription
+  * newLink：在新建新闻链接后实时更新列表
+  * newVote：在用户点赞/帮顶后实时更新列表
+
+例如，你可以发送如下的 feed query 来从服务端获取最近的 10 条信息：
+
+```graphql
+{
+  feed(skip: 0, first: 10) {
+    links {
+      description
+      url
+      postedBy {
+        name
+      }
+    }
+  }
+}
+```
+
+或者可以是用来创建新用户的 signup mutation
+
+```graphql
+mutation {
+  signup(
+    name: "Sarah",
+    email: "sarah@graph.cool",
+    password: "graphql"
+  ) {
+    token
+    user {
+      id
+    }
+  }
+}
+```
+
 ### 部署 Prisma 数据库服务
 
-这是启动服务前的最后一步了：部署数据库。
+这是启动服务前的最后一步了：部署 Prisma 项目，这样 GraphQL 服务端才可以访问它获取数据。
 
-具体的方式就是，安装依赖然后激活部署。在控制台，首先进入 server 文件目录下，然后执行：
+部署 Prisma 你所要做的就是：安装依赖然后在 server 目录下执行 prisma deploy 命令。
+
+在控制台，进入 server 目录下，然后执行：
 
 ```
 cd server
@@ -267,41 +357,26 @@ yarn install
 yarn prisma deploy
 ```
 
-> 当执行 yarn prisma deploy 的时候，随便选择一个开发 cluster 就可以，public-us1 或者 public-eu1 均可。
+注：如果你已经全局安装了 prisma CLI（如需全局安装，执行 yarn global add prisma 即可），你就可以省略 yarn prisma 命令。这时，直接执行 prisma deploy 即可。
 
-执行成功后，在打印的日志里面将 HTTP 端口信息粘贴到 server/src/index.js 文件里，替换掉 `__PRISMA_ENDPOINT__`：
+安装过程中，当需要你选择在哪里配置/部署服务的时候，选择 Demo server（需要登录，你可以使用 Github 账号），然后选择一个区域（region），例如 demo-us1 或者 demo-eu1。此时 Demo server 会包含一个免费的 AWS Aurora 数据库实例。（如果你已经安装了 Docker，你也可以在本地部署。）
 
-```js
-const server = new GraphQLServer({
-  typeDefs: './src/schema.graphql',
-  resolvers,
-  context: req => ({
-    ...req,
-    db: new Prisma({
-      typeDefs: 'src/generated/prisma.graphql',
-      endpoint: '__PRISMA_ENDPOINT__',
-      secret: 'mysecret123',
-    }),
-  }),
-})
-```
-
-> 如果日志丢失，可以执行：
-
-```
-yarn prisma info
-```
+> 注：一旦命令执行完毕，CLI 将会把 Prisma API 的端口写入你的 prisma.yml 文件。它大概会是这样子：https://eu1.prisma.sh/john-doe/hackernews-node/dev。
 
 ### “探索”服务
 
-现在你可以开始试着探索你的服务了。在 server 目录下，执行如下命令来启动服务：
+Prisma 端口填写完成后，现在你可以开始试着探索你的服务了！
+
+在 server 目录下，执行如下命令来启动服务：
 
 ```
 yarn start
 ```
 
-这行命令将会运行 package.json 文件中 script start 对应的命令。它首先会启动服务，然后将会打开一个 [GraphQL 练习场](https://github.com/graphcool/graphql-playground)，你可以用它来探索 API。
+这行命令将会运行 package.json 文件中 script start 对应的命令。它首先会启动服务（服务将会运行在：http://localhost:4000），然后将会自动打开 [GraphQL 练习场](https://github.com/graphcool/graphql-playground)界面，你可以用它来探索 API。
 
-如果启动报错，请更新你的 node 版本。
+![GraphQL 练习场](../imgs/graphqlpic11.png)
 
-如果你打开了 playground，你就可以试着输入一些代码来测试了，参照[原文](https://www.howtographql.com/react-apollo/1-getting-started/)的栗子很简单～如果有兴趣的可以去看看，这里不赘述。
+...
+
+> 如果你已经打开了 GraphQL 练习场，就可以试着输入一些代码来测试 API 了，参照[原文](https://www.howtographql.com/react-apollo/1-getting-started/)的栗子很简单～如果有兴趣的可以去看看，这里不赘述。

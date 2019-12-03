@@ -12,6 +12,8 @@ Translated By Yuqi 🌸
 
 🎉 欢迎校对者～
 
+PS：最近本仓库正在持续的校对+更新中，fork 了的小伙伴记得要 fetch upstream 哦～～～
+
 ## 目录
 
 * 基础教程
@@ -28,3 +30,4 @@ Translated By Yuqi 🌸
   * [常见问题](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/1-AdvancedTutorial/5-Common-Questions.md)
 * React - Apollo 教程
   * [React + Apollo 教程 - 简介](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/2-ReactApolloTutorial/0-Introduction.md)
+  * [React - Apollo 入门教程](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/2-ReactApolloTutorial/1-Getting-Started.md)
