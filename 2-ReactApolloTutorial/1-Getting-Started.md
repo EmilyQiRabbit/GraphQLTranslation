@@ -163,7 +163,7 @@ yarn add apollo-boost react-apollo graphql
   * apollo-link-http：用于获取服务端数据
   * apollo-link-error：处理错误
   * apollo-link-state：状态管理
-  * graphql-tag：用于 queriy 和 mutation 的 gql 方法
+  * graphql-tag：用于 query 和 mutation 的 gql 方法
 
 * [react-apollo](https://github.com/apollographql/react-apollo) 包含了 Apollo 与 React 的绑定功能
 
@@ -255,7 +255,7 @@ curl https://codeload.github.com/howtographql/react-apollo/tar.gz/starter | tar 
   * resolvers 包含了定义在应用模式里的 resolver 函数，用于解析 GraphQL 操作。
   * index.js 是 GraphQL 服务的入口。
 
-在上面提到的这些文件中，前端研发者只需要关心定义在 server/src/schema.graphql 里的应用模式。这个文件里包含了 GraphQL 模式，它定义了所有能从前端应用发送的操作（即 queriy，mutation 和 subscription）。
+在上面提到的这些文件中，前端研发者只需要关心定义在 server/src/schema.graphql 里的应用模式。这个文件里包含了 GraphQL 模式，它定义了所有能从前端应用发送的操作（即 query，mutation 和 subscription）。
 
 这个文件中的代码如下：
 
@@ -297,7 +297,7 @@ type Subscription {
 
 该模式支持如下的操作：
 
-* Queriy：
+* Query：
   * feed：从后端取回所有的新闻链接，同时支持过滤参数、排序和分页。
 
 * Mutation：

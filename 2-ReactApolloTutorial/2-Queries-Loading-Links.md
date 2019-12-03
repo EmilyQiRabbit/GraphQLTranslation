@@ -3,7 +3,7 @@
 > * 译者：[Yuqi🌸](https://github.com/EmilyQiRabbit)
 > * **欢迎校对** 🙋‍♀️🎉
 
-# Queries 请求：加载链接
+# query 请求：加载新闻链接数据
 
 ## 准备 React 组件
 
