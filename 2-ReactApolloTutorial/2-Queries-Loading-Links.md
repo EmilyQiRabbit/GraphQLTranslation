@@ -7,7 +7,7 @@
 
 ## 准备 React 组件
 
-这个应用需要实现的第一个功能就是加载并显示一个 Link 元素组成的列表。我们从搭建 React component 的层级结构入手，并且首先只渲染单个 link 的组件。
+这个应用需要实现的第一个功能是加载并显示一个由 Link 元素组成的列表。我们将沿着 React 组件的层级结构逐步前进，并从渲染单个新闻链接的组件开始。
 
 在 components 目录下创建一个新的文件：Link.js，然后添加如下的代码：
 
@@ -29,7 +29,7 @@ class Link extends Component {
 export default Link
 ```
 
-这是个非常简单的 React 组件，不再赘述。
+这是个非常简单的 React 组件，其 props 中包含了 link 属性，将会渲染出该 link 的 description 和 url 信息。非常容易吧 🍰！
 
 然后在 components 目录下再创建一个新的文件：LinkList.js，并添加如下代码：
 
@@ -42,7 +42,7 @@ class LinkList extends Component {
     const linksToRender = [
       {
         id: '1',
-        description: 'Prisma turns your database into a GraphQL API 😎 😎',
+        description: 'Prisma turns your database into a GraphQL API 😎',
         url: 'https://www.prismagraphql.com',
       },
       {
@@ -61,7 +61,7 @@ class LinkList extends Component {
 export default LinkList
 ```
 
-这里用了本地的 mock 数据来检验 Link 组件是否运作正常。后面这些数据将会从后台服务获取。
+这里用了本地保存的模拟数据来检验 Link 组件是否运作正常。稍后我们将会学习如何从后台服务获取这些数据 —— 要一步步来，young Padawan！
 
 最后，修改 App.js 文件：
 
@@ -78,15 +78,15 @@ class App extends Component {
 export default App
 ```
 
-运行 app 看看是不是目前为止一切正常？如果正常的话，在浏览器应该能看到：
+下面我们运行 app，如果一切正常的话，在浏览器应该能看到：
 
 ![graphqlpic7](../imgs/graphqlpic7.png)
 
-## 写 GraphQL query
+## 第一个 GraphQL query 请求
 
-下面你将要从数据库加载真正的链接地址。首先你去要定义你想发送给 API 的 GraphQL query：
+下面你将要从数据库加载已保存的新闻链接信息，而不是使用本地的模拟数据。首先你要定义发送给 API 的 GraphQL query：
 
-```js
+```graphql
 {
   feed {
     links {
@@ -99,13 +99,13 @@ export default App
 }
 ```
 
-你在 playground 里面执行这段代码，就可以从 GraphQL 服务得到结果。但是如何在 JS 代码中使用它呢？
+你在[练习场](https://www.prisma.io/docs/get-started/03-build-graphql-servers-with-prisma-TYPESCRIPT-t201/#explore-the-graphql-api-in-a-playground)里直接执行这段代码，就可以从 GraphQL 服务得到请求的结果。但是如何在 JS 代码中使用它呢？
 
-## 使用 Apollo Client 发送 query
+## 使用 Apollo 客户端发送 query
 
-当使用 Apollo 时，你有两种发送 query 请求给服务端的方式。
+如果使用了 Apollo，那么你有两种向服务端发送 query 请求的方式。
 
-第一种是在 ApolloClient 直接使用 query 方法。这是种方式方式简单直接，并允许你用 promise 的方式获取结果。
+第一种是在 ApolloClient 实例上直接调用 query 方法。这是种方式方式简单直接，并可以以 promise 的方式取到结果。
 
 例如：
 
@@ -123,19 +123,19 @@ client.query({
 }).then(response => console.log(response.data.allLinks))
 ```
 
-然而，使用 React 时更具声明性的方法是使用新版本 Apollo 的 render prop API：仅仅使用组件来管理 GraphQL 数据。
+然而，由于是和 React 一起使用，我们应该选择更具声明性的方法：使用 Apollo 的 [render prop API](https://dev-blog.apollodata.com/introducing-react-apollo-2-1-c837cc23d926)，这样我们只需使用组件即可管理 GraphQL 数据。
 
-使用这个方法获取数据，你要做的就是当需要获取数据的时候，将 GraphQL query 作为属性传递进去，之后 Query 组件就将会帮助你获取数据，并把它作为 props 提供给组件。
+如果使用这个方法，你要做的就是：在需要获取数据的时候，将 GraphQL query 作为属性传递给 `<Query />` 组件，它将会帮助你获取数据；当数据取回后，将以组件 [render prop 函数](https://reactjs.org/docs/render-props.html) 的方式提供给开发者。
 
-因此一般来说，添加获取数据逻辑的步骤就很相似：
+因此，每次添加获取数据逻辑的代码的步骤都很类似：
 
-1. 使用 gql 把 query 写成一个 JS 常量
+1. 使用 gql 把 query 赋值给一个 JS 常量
 
-2. 使用 Query 组件将 query 作为 props 传递进去
+2. 将 query 作为 props 传递给 `<Query />` 组件
 
-3. 在组件的 render prop function 中获取请求结果
+3. 在组件内部的 render prop 函数中获取请求结果
 
-我们来改写 LinkList.js：
+我们来改写 [LinkList.js](https://github.com/howtographql/react-apollo/blob/master/src/components/LinkList.js)：
 
 ```js
 const FEED_QUERY = gql`
@@ -150,7 +150,7 @@ const FEED_QUERY = gql`
     }
   }
 `
-...
+// 并将返回值替换为：
 return (
   <Query query={FEED_QUERY}>
     {() => linksToRender.map(link => <Link key={link.id} link={link} />)}
@@ -160,22 +160,20 @@ return (
 
 这段代码是什么意思呢：
 
-1. 常量 FEED_QUERY 包含了这个 query，gql 函数用来解析这个包含了 GraphQL 代码的字符串。(如果你不熟悉 '``' 语法，[参考这里](https://wesbos.com/tagged-template-literals/))
+1. 常量 FEED_QUERY 包含了这个 query 的信息。gql 函数用来解析这个包含了 GraphQL 代码的字符串。(如果你不熟悉 '``' 这种语法，可以[参考这里](https://wesbos.com/tagged-template-literals/))
 
-2. 最后，将返回值用 <Query /> 组件包裹，并将 FEED_QUERY 作为 prop 传递进去。
+2. 最后，将函数原来的返回值用 `<Query />` 组件包裹，并将 FEED_QUERY 作为 prop 传递进去。
 
-> 注意：我们将 linksToRender 作为函数返回值。这样做的原因是 <Query /> 组件提供的 render prop function。
-
-为了让这段代码能够工作，还需要 import 相关的依赖：
+为了让这段代码能够正常工作，还需要引入相关的依赖：
 
 ```JavaScript
 import { Query } from 'react-apollo'
 import gql from 'graphql-tag'
 ```
 
-这就是用来获取数据的全部代码了，是不是很棒？
+这就是可以获取到数据的代码了，是不是很棒？但是我们现在还在渲染的是本地模拟的数据，而不是从服务端获取的数据。下面我们来再改一下代码 🤩。
 
-现在你可以删除掉那些 mock 的数据了，数据已经可以从服务端获取。
+我们现在可以删除掉那些本地的模拟数据了，通过 `<Query />` 组件的 render prop 函数，数据已经可以从服务端获取。
 
 更新 LinkList.js：
 
@@ -202,16 +200,14 @@ class LinkList extends Component {
 }
 ```
 
-让我们来分析下这段代码到底做了什么？正如我们所预期的那样，Apollo 给组件的 render prop function 注入了新的 prop，这些 prop 提供了有关网络请求的信息：
+让我们来分析下这段代码到底做了什么？正如我们所预期的那样，Apollo 给组件的 render prop 函数提供了几个新的参数，这些参数提供了网络请求相关的信息：
 
 1. loading：当网络请求还依旧进行、没有收到应答的时候，这个值是 true。
 
 2. error：如果请求失败，这个字段就会包含错误信息。
 
-3. feed：这个是从服务器接收到的返回信息。
+3. data：包含了从服务器获取到的数据。在这里就是我们请求的那些新闻链接的信息。
 
-> 实际上，对于 prop 设置还有很多，可以查看[文档](https://www.apollographql.com/docs/react/essentials/queries.html#graphql-query-data)进行更多探索。
+> 实际上，这些参数还能提供更多功能，如果你想了解更多，可以查看[文档](https://www.apollographql.com/docs/tutorial/queries/)。
 
 完成了，现在再次运行 yarn start 来试试看。你将会看到真实的从服务端返回的数据了。（别忘了在 server 目录下也需要 yarn start 哦！）
-
-[self Proofreading +1]
