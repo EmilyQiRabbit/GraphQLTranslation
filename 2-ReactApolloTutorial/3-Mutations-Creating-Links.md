@@ -3,7 +3,7 @@
 > * 译者：[Yuqi🌸](https://github.com/EmilyQiRabbit)
 > * **欢迎校对** 🙋‍♀️🎉
 
-# 使用 Mutation 创建新的新闻链接
+# 使用 mutation 创建新的新闻链接
 
 这一章我们将会学习如何使用 Apollo 发送 mutation（即：修改/新建/删除）请求。它与 query 请求的区别不大，同样也遵循三个步骤，只是后两步稍有区别：
 

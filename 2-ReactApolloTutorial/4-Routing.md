@@ -5,7 +5,7 @@
 
 # 路由
 
-这一章我们将会学到如何将 Apollo 和 react-router 联合，来实现导航功能。
+这一章我们将会学习：如何将 Apollo 和 react-router 结合起来实现导航功能。
 
 ## 安装依赖
 
