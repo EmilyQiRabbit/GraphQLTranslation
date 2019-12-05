@@ -3,21 +3,21 @@
 > * 译者：[Yuqi🌸](https://github.com/EmilyQiRabbit)
 > * **欢迎校对** 🙋‍♀️🎉
 
-# 使用 Mutations 创建 Link
+# 使用 Mutation 创建新的新闻链接
 
-这一章你将会学习如何使用 Apollo 发送 mutation（修改/新建/删除）请求，它与 query 请求的区别不大，同样也是遵循三个步骤，只是后两步稍有区别：
+这一章我们将会学习如何使用 Apollo 发送 mutation（即：修改/新建/删除）请求。它与 query 请求的区别不大，同样也遵循三个步骤，只是后两步稍有区别：
 
-1. 使用 gql 解析函数写一个表示 mutation 的 JS 常量
+1. 使用 gql 解析函数写一个表示 mutation 的 JavaScript 常量
 
-2. 使用 <Mutation /> 组件，并将 mutation 和其他必需参数作为 props 传递
+2. 使用 `<Mutation />` 组件，并将 mutation 和作为 props 传递给组件
 
-3. 使用 mutation 函数，它被注入了组件的 render prop function 中
+3. 使用 mutation 函数，这个函数可以在组件的 render prop 函数中获取到
 
 ## 准备 React 组件
 
-首先需要准备一个能够让用户用来添加链接的 React 组件。
+首先需要准备一个能够让用户用添加新闻链接的 React 组件。
 
-在 component 目录下创建一个新的文件 CreateLink.js。然后把下面的代码复制进去：
+在 src/components 目录下创建一个新的文件 CreateLink.js。然后把下面的代码复制进去：
 
 ```js
 import React, { Component } from 'react'
@@ -57,13 +57,13 @@ class CreateLink extends Component {
 export default CreateLink
 ```
 
-组件内包含了两个 input 输入框，用户可以用它们来输入想要创建的 link 的地址信息 url 和描述信息 description。信息将会被保存在 state 中，将会在用户发起 mutation 请求的时候被使用。
+组件内包含了两个 input 输入框，用户可以用它们输入想要创建的新闻链接的地址信息 url 和描述信息 description。信息将会被保存在组件的 state 中，并将会在用户发起 mutation 请求的时候使用。
 
-## 写 mutation
+## 第一个 mutation 请求
 
-到底应该怎么发起 mutation 请求呢。我们来按照前文提到的三个步骤进行。
+到底应该如何将 mutation 请求发送至服务端呢。我们按照前文提到的三个步骤依次进行。
 
-首先需要定义 mutation 代码，然后将组件用 graphql 容器包裹。这个步骤和 query 请求方法很类似。
+首先使用 JavaScript 代码定义 mutation，然后将组件用 graphql 容器包裹。这一步和 query 请求很类似。
 
 在 CreateLing.js 中添加如下的代码：
 
@@ -79,7 +79,7 @@ const POST_MUTATION = gql`
   }
 `
 
-...
+// 替换 button 的代码
 
 <Mutation mutation={POST_MUTATION} variables={{ description, url }}>
   {() => (
@@ -94,18 +94,18 @@ const POST_MUTATION = gql`
 
 1. 常量 POST_MUTATION 内包含了 mutation 信息
 
-2. 将 button 元素作为 render prop function 的结果，包裹在 <Mutation /> 组件中，并将 POST_MUTATION 作为 prop 传递进去
+2. 将 button 元素作为 render prop 函数的返回值，它被包裹在 `<Mutation />` 组件中，并需要将 POST_MUTATION 作为 prop 传递给 `<Mutation />` 组件
 
-3. 最后，将 description 和 url 作为 variables prop 传递进 <Mutation /> 组件
+3. 最后，将 description 和 url 信息作为 variables prop 传递给 `<Mutation />` 组件
 
-当然别忘了添加依赖：
+当然，别忘了添加依赖：
 
 ```js
 import { Mutation } from 'react-apollo'
 import gql from 'graphql-tag'
 ```
 
-最后，修改 <Mutation /> 组件：
+最后，修改 `<Mutation />` 组件：
 
 ```js
 <Mutation mutation={POST_MUTATION} variables={{ description, url }}>
@@ -113,9 +113,11 @@ import gql from 'graphql-tag'
 </Mutation>
 ```
 
-跟之前说的一样，你需要做的就仅仅是在按钮点击的时候，调用 Apollo 已经注入到 <Mutation /> 组件中的 postMutation 方法。
+跟之前说的一样，你需要做的就是在按钮点击事件函数中，调用 Apollo 已经注入到 `<Mutation />` 组件的 render prop 函数中的 postMutation 方法。
 
-查看下 mutation 是否工作了，将 App.js 的 render 改成下面这样：
+[点击这里可以查看 CreateLink.js 源代码](https://github.com/howtographql/react-apollo/blob/master/src/components/CreateLink.js)
+
+下面我们就可以验证 mutation 是否工作了，将 App.js 的 render 改成下面这样：
 
 ```js
 render() {
@@ -131,6 +133,6 @@ render() {
 import CreateLink from './CreateLink'
 ```
 
-现在，运行 yarn start，就可以试着发送 mutation 了。
+现在，运行 yarn start，你应该会看到如下的界面，此时就可以发送 mutation 了。
 
-[self Proofreading +1]
+![graphql12](../imgs/graphqlpic12.png)
