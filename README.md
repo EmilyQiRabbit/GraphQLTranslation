@@ -34,3 +34,4 @@ PS：最近本仓库正在持续的校对+更新中，fork 了的小伙伴记得
   * [使用 query 加载新闻链接数据](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/2-ReactApolloTutorial/2-Queries-Loading-Links.md)
   * [使用 mutation 创建新的新闻链接](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/2-ReactApolloTutorial/3-Mutations-Creating-Links.md)
   * [路由配置](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/2-ReactApolloTutorial/4-Routing.md)
+  * [认证](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/2-ReactApolloTutorial/5-Authentication.md)
