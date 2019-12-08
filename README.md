@@ -1,4 +1,4 @@
-# [GraphQL](https://www.howtographql.com/basics/0-introduction/) 中文：一份向着标准版和专业版努力的翻译
+# [HOW TO GRAPHQL](https://www.howtographql.com/basics/0-introduction/) 中文：一份向着标准版和专业版努力的翻译
 
 目前完成翻译的章节仅包括：
 
