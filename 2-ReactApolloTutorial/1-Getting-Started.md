@@ -304,11 +304,11 @@ type Subscription {
   * post：登录了的用户可以创建新的新闻链接
   * signup：为新用户创建账号
   * login：已注册用户登录
-  * vote：支持以登录的用户为喜欢的新闻链接点赞/帮顶
+  * vote：支持以登录的用户为喜欢的新闻链接点赞
 
 * Subscription
   * newLink：在新建新闻链接后实时更新列表
-  * newVote：在用户点赞/帮顶后实时更新列表
+  * newVote：在用户点赞后实时更新列表
 
 例如，你可以发送如下的 feed query 来从服务端获取最近的 10 条信息：
 
