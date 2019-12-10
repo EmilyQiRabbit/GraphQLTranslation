@@ -3,13 +3,13 @@
 > * 译者：[Yuqi🌸](https://github.com/EmilyQiRabbit)
 > * **欢迎校对** 🙋‍♀️🎉
 
-# 过滤器：查找特定的 Link 列表
+# 条件过滤：查找符合条件的新闻链接列表
 
-这一章，我们将会学习如何使用 GraphQL API 来实现查找功能
+这一章，我们将会学习使用 GraphQL API 的条件过滤，并实现查找功能。
 
 ## 准备 React 元素
 
-新建一个路由也就需要新建一个页面，当然也是新的 React 元素：
+搜索功能需要一个新的路由地址，因此我们也需要实现一个新的 React 组件。
 
 在 src/components 文件目录下新建 Search.js 文件，然后添加如下代码：
 
@@ -45,22 +45,24 @@ class Search extends Component {
   }
 
   _executeSearch = async () => {
-    // ... you'll implement this soon
+    // ... 我们稍后实现这部分代码
   }
 }
 
 export default withApollo(Search)
 ```
 
-这是一个标准的初始化流程。在这个 input 中用户可以输入想要查找的内容。
+这个流程我们很熟悉了。在这个 input 输入框中用户可以输入想要查找的字符串。
 
-组件的 state 的 links 字段将会包含所有被渲染的 link，并且这次我们不能通过组件 props 来获取查询结果。我们将使用 withApollo 的方法来完成这个功能。
+组件 state 中的 links 字段将会包含所有需要被渲染的新闻链接信息，所以现在我们不能通过组件的 prop 来获取查询结果。我们稍后将会讨论一下导出组件时使用的 withApollo 函数！
 
-先吧 search 组件添加到 App.js 中：
+先吧 search 组件添加到 App.js 中，为其添加一个新的路由：
 
 ```JavaScript
 import Search from './Search'
-...
+
+// ...
+
 render() {
   return (
     <div className='center w85'>
@@ -78,7 +80,9 @@ render() {
 }
 ```
 
-在 Header.js 中也添加一下 Search 的导航：
+在 Header.js 中也添加一下 Search 页面的导航，这样用户使用起来会比较方便。
+
+修改 [Header.js](https://github.com/howtographql/react-apollo/blob/master/src/components/Header.js):
 
 ```JavaScript
 <div className="flex flex-fixed black">
@@ -101,11 +105,11 @@ render() {
 </div>
 ```
 
-好了，现在组件框架搭建完毕，现在我们来实现查找功能！
+好了，现在我们回到 Search 组件，来实现查找功能！
 
-## 查找 Links
+## 查询新闻链接
 
-在 Search.js 中加上请求的定义：
+在 [Search.js](https://github.com/howtographql/react-apollo/blob/master/src/components/Search.js) 中加上 query 请求的定义：
 
 ```JavaScript
 const FEED_SEARCH_QUERY = gql`
@@ -132,9 +136,9 @@ const FEED_SEARCH_QUERY = gql`
 `
 ```
 
-这个 query 和 LinkList 的 query 很像，但是多了一个参数：filter。它将会作为条件，限制你返回的 links 结果。
+这个 query 和 LinkList 组件中的 query 类似，但是多了一个名为 filter 的参数。它将会作为条件，限制服务端返回的列表中的新闻链接。
 
-实际的 filter 操作在 server/src/resolvers/Query.js 文件中的 feed resolver 中实现：
+实际的条件过滤操作在 [server/src/resolvers/Query.js](https://github.com/howtographql/react-apollo/blob/master/server/src/resolvers/Query.js) 文件中的 feed resolver 函数中实现：
 
 ```JavaScript
 async function feed(parent, args, ctx, info) {
@@ -152,17 +156,15 @@ async function feed(parent, args, ctx, info) {
 }
 ```
 
-哎呦反正我现在看不懂，要看 Node 教程那边才能懂～
+> 哎呦反正现在是看不懂，要学习 Node 教程的章节才可以哦。
 
-大概讲一下：
+这段代码中，定义了两个 where 条件：当这个新闻链接的 url 或者 description 中的一个包含了条件 filter 字符串，那么这个新闻链接才会被返回。两个条件 `{ url_contains: filter }` 和 `{ description_contains: filter }` 使用 Prisma 的 OR 操作符链接。
 
-定义了两个 where 条件：当这个 link 的 url 或者 description 中的一个包含了查询条件，那么这个 link 将会被返回。
+现在 query 已经定义好了，非常完美。这一次，我们希望在用户按下搜索按钮后加载数据，而不是在组件初始化加载的时候。
 
-完美～现在 query 都定义好了。这一次，我们希望用户按下 search 按钮后才获取数据，而不是组件一加载的时候。
+因此我们需要使用 withApollo 方法。这个方法将 ApolloClient 实例作为 client prop 注入到了 Search 组件里。
 
-这就是应用 withApollo 方法的目的。这个方法将 ApolloClient 实例作为 client prop 注入到了 Search 组件里。
-
-这个 client 中有一个 query 方法，你可以用它来手动发送请求，而不是使用之前那样的 graphql 高阶组件的方法。
+这个 client 属性中有一个 query 方法，你可以用它来手动发送请求，而不是像之前那样使用 graphql 高阶组件。
 
 我们来修改下 Search.js 的 _executeSearch：
 
@@ -178,11 +180,11 @@ _executeSearch = async () => {
 }
 ```
 
-完成了。现在你可以手动执行 FEED_SEARCH_QUERY 然后从服务端获取结果。之后这些信息将作为组件的 state，被渲染在界面上。
+非常轻松就完成了。现在你可以手动发起 FEED_SEARCH_QUERY 请求并从服务端获取结果。之后这些信息将会存入组件的 state，然后被渲染在界面上。
 
 用 yarn start 启动服务试试看吧！
 
-Search.js 的完整代码：
+附上 Search.js 的完整代码：
 
 ```js
 import React, { Component } from 'react'
@@ -250,5 +252,3 @@ class Search extends Component {
 
 export default withApollo(Search)
 ```
-
-[self Proofreading +1]
