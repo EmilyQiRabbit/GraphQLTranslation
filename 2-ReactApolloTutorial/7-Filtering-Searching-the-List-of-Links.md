@@ -54,7 +54,7 @@ export default withApollo(Search)
 
 这个流程我们很熟悉了。在这个 input 输入框中用户可以输入想要查找的字符串。
 
-组件 state 中的 links 字段将会包含所有需要被渲染的新闻链接信息，所以现在我们不能通过组件的 prop 来获取查询结果。我们稍后将会讨论一下导出组件时使用的 withApollo 函数！
+组件 state 中的 links 字段将会包含所有需要被渲染的新闻链接信息，所以现在我们不能通过组件的属性来获取查询结果。我们稍后将会讨论一下导出组件时使用的 withApollo 函数！
 
 先吧 search 组件添加到 App.js 中，为其添加一个新的路由：
 
@@ -162,7 +162,7 @@ async function feed(parent, args, ctx, info) {
 
 现在 query 已经定义好了，非常完美。这一次，我们希望在用户按下搜索按钮后加载数据，而不是在组件初始化加载的时候。
 
-因此我们需要使用 withApollo 方法。这个方法将 ApolloClient 实例作为 client prop 注入到了 Search 组件里。
+因此我们需要使用 withApollo 方法。这个方法将 ApolloClient 实例作为 client 属性注入到了 Search 组件里。
 
 这个 client 属性中有一个 query 方法，你可以用它来手动发送请求，而不是像之前那样使用 graphql 高阶组件。
 

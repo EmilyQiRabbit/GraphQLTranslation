@@ -29,7 +29,7 @@ class Link extends Component {
 export default Link
 ```
 
-这是个非常简单的 React 组件，其 props 中包含了 link 属性，将会渲染出该 link 的 description 和 url 信息。非常容易吧 🍰！
+这是个非常简单的 React 组件，其属性（this.props）中包含了 link 属性，将会渲染出该 link 的 description 和 url 信息。非常容易吧 🍰！
 
 然后在 components 目录下再创建一个新的文件：LinkList.js，并添加如下代码：
 
@@ -131,7 +131,7 @@ client.query({
 
 1. 使用 gql 把 query 赋值给一个 JS 常量
 
-2. 将 query 作为 props 传递给 `<Query />` 组件
+2. 将 FEED_QUERY 常量作为 query 属性传递给 `<Query />` 组件
 
 3. 在组件内部的 render prop 函数中获取请求结果
 
@@ -162,7 +162,7 @@ return (
 
 1. 常量 FEED_QUERY 包含了这个 query 的信息。gql 函数用来解析这个包含了 GraphQL 代码的字符串。(如果你不熟悉 '``' 这种语法，可以[参考这里](https://wesbos.com/tagged-template-literals/))
 
-2. 最后，将函数原来的返回值用 `<Query />` 组件包裹，并将 FEED_QUERY 作为 prop 传递进去。
+2. 最后，将函数原来的返回值用 `<Query />` 组件包裹，并将 FEED_QUERY 作为属性传递进去。
 
 为了让这段代码能够正常工作，还需要引入相关的依赖：
 

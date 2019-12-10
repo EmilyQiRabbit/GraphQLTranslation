@@ -26,7 +26,7 @@ GraphQL 最大的优点之一，就是能够以**声明式**的方法来获取�
 
 一旦 GraphQL 客户端收到并处理了来自服务端的应答，请求到的数据就要以某种形式展现在 UI 上。UI 处理更新的方式都是不同的，它取决于你在开发过程中采用了什么平台和框架。
 
-例如说 React，GraphQL 客户端采用了**高阶组件**的概念来在后台获取需要的数据，然后作为 `props` 提供给组件。通常来说，GraphQL 的声明式特性和[**函数式反应式编程**](https://en.wikipedia.org/wiki/Functional_reactive_programming)（Functional reactive programming，FRP）技术很契合。这两项技术如果联合起来将会非常强大，即：view 层只需要声明它的数据依赖，然后 UI 就会和你选择的 FRP 层绑定。
+例如说 React，GraphQL 客户端采用了**高阶组件**的概念在后台获取需要的数据，然后作为属性，即 `props`，提供给组件。通常来说，GraphQL 的声明式特性和[**函数式反应式编程**](https://en.wikipedia.org/wiki/Functional_reactive_programming)（Functional reactive programming，FRP）技术很契合。这两项技术如果联合起来将会非常强大，即：view 层只需要声明它的数据依赖，然后 UI 就会和你选择的 FRP 层绑定。
 
 ## 缓存 query 结果：概念和策略
 

@@ -9,7 +9,7 @@
 
 1. 使用 gql 解析函数写一个表示 mutation 的 JavaScript 常量
 
-2. 使用 `<Mutation />` 组件，并将 mutation 和作为 props 传递给组件
+2. 使用 `<Mutation />` 组件，并将 POST_MUTATION 和其他参数作为 mutation 和 variables 属性传递给该组件
 
 3. 使用 mutation 函数，这个函数可以在组件的 render prop 函数中获取到
 
@@ -94,9 +94,9 @@ const POST_MUTATION = gql`
 
 1. 常量 POST_MUTATION 内包含了 mutation 信息
 
-2. 将 button 元素作为 render prop 函数的返回值，它被包裹在 `<Mutation />` 组件中，并需要将 POST_MUTATION 作为 prop 传递给 `<Mutation />` 组件
+2. 将 button 元素作为 render prop 函数的返回值，它被包裹在 `<Mutation />` 组件中，并需要将 POST_MUTATION 作为属性传递给 `<Mutation />` 组件
 
-3. 最后，将 description 和 url 信息作为 variables prop 传递给 `<Mutation />` 组件
+3. 最后，将 description 和 url 信息作为 variables 属性传递给 `<Mutation />` 组件
 
 当然，别忘了添加依赖：
 

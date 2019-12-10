@@ -244,7 +244,7 @@ _updateCacheAfterVote = (store, createVote, linkId) => {
 
 3. 最后，把修改过的数据写回到 store 中。
 
-接下来，把这个方法作为 prop 传递给 Link 组件。
+接下来，把这个方法作为 updateStoreAfterVote 属性传递给 Link 组件。
 
 修改 LinkList.js：
 
