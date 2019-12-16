@@ -38,3 +38,4 @@ PS：最近本仓库正在持续的校对+更新中，fork 了的小伙伴记得
   * [更多 mutation 请求实例，以及 store 的更新](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/2-ReactApolloTutorial/6-More-Mutations-and-Updating-the-Store.md)
   * [条件过滤：查找符合条件的新闻链接列表](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/2-ReactApolloTutorial/7-Filtering-Searching-the-List-of-Links.md)
   * [使用订阅（subscription）实现实时更新](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/2-ReactApolloTutorial/8-Realtime-Updates-with-GraphQL-Subscriptions.md)
+  * [分页](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/2-ReactApolloTutorial/9-Pagination.md)

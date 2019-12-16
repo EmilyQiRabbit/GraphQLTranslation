@@ -5,17 +5,19 @@
 
 # 分页
 
-本篇教程是关于如何给数据分页，这也是 React-Apollo 这一模块的最后一小节了。分页，即用户可以分段获取并查看 link 元素，而不是一开始就获取列表所有内容。
+本篇教程我们将会学习如何为数据分页，这是 React-Apollo 模块的最后一章了。我们将会实现一个简单的分页方法，这样用户就可以分段获取并查看数个新闻链接，而不是一次性获取包含所有新闻链接的列表。
 
 ## 准备 React 组件
 
-这里，我们需要微微调整下路由。LinkList 组件将会被两个路由引用。第一种路由引用的情况下，它将会显示前十名投票最高的 link，第二种引用它将会将 link 分成多页，可由用户选择页码。
+首先，我们需要稍微调整下路由配置。LinkList 组件将会被两个路由引用。第一种情况下，它将会显示前十名投票最高的新闻链接，第二种情况下，它将会将新闻链接数据分成多页展示，并且可由用户选择页码。
 
-修改 App.js 文件：
+修改 [App.js](https://github.com/howtographql/react-apollo/blob/master/src/components/App.js) 文件：
 
 ```JavaScript
 import { Switch, Route, Redirect } from 'react-router-dom'
-...
+
+// ...
+
 render() {
   return (
     <div className='center w85'>
@@ -35,11 +37,11 @@ render() {
 }
 ```
 
-/top 和 /new/:page 是本次新添的路由。后者的 url 中包含页码，相关的组件也就是 LinkList 就可以读取到这个信息，并根据页码作出反应。
+我们新增了两个路由：`/top` 和 `/new/:page`。后者的 url 中包含页码 page，路由相关的组件，即 LinkList 组件就可以读取到这个信息。
 
-根目录现在重定向到了页码是 1 的列表页。
+根目录 `/` 现在重定向到了页码是 1 的列表页：`/new/1`。
 
-同时，也对应的修改 header：
+同时 [Header.js](https://github.com/howtographql/react-apollo/blob/master/src/components/Header.js) 也要作出相应的修改：
 
 ```JavaScript
 <Link to="/top" className="ml1 no-underline black">
@@ -78,9 +80,9 @@ export const FEED_QUERY = gql`
 `
 ```
 
-query 请求现在接受了分页需要的参数：skip 参数定义了返回的信息应该从第多少个开始。first 则表示应返回多少个 link。也就是，如果定义了 skip 是 10，first 是 5。那么将会返回总列表的第 10-15 个。orderBy 定义了返回结果应当如何排序。
+query 请求现在可以接受用于实现分页需要的参数：skip 参数定义了偏移量，即数据应该从第多少位开始。first 用于限制数据条目的数量，即应返回多少条新闻链接。也就是，如果定义了 skip 是 10，first 是 5。那么将会返回总列表的第 10-15 个。orderBy 定义了返回的数据应当如何排序。
 
-但是当使用 <Query /> 组件获取数据的时候，如何将这些参数传入进去呢？你需要在声明组件的时候就通过 variables 提供参数：
+但是当使用 `<Query />` 组件获取数据的时候，如何将这些参数传递进去呢？你需要在声明组件的时候，通过 variables 属性提供参数：
 
 在 LinkList 中添加如下方法：
 
@@ -96,30 +98,31 @@ _getQueryVariables = () => {
 }
 ```
 
-然后更新 LinkList 的 <Query /> 组件：
+然后更新 LinkList 中的 `<Query />` 组件：
 
 ```js
 <Query query={FEED_QUERY} variables={this._getQueryVariables()}>
 ```
 
-现在，传递给 variables 的参数包括了当前页面的 first, skip, orderBy。可以使用 ownProps.match.params.page（React-Router 特性）来获取当前页码，然后计算 first 和 skip 的值。
+现在，我们将当前页面的 first, skip, orderBy 参数作为 variables 属性传递给了组件。可以使用 `ownProps.match.params.page`（React-Router 特性）获取当前页码，然后计算出 first 和 skip 的值。
 
-createdAt_DESC 属性保证了最新创建的 link 将会优先显示。而如果组件是被 /top 路由加载的，那么需要返回的是投票最高的 link。
+createdAt_DESC 属性则保证了最新创建的新闻链接将会优先显示。而如果组件是通过路由 `/top` 加载的，那么需要返回的是投票最高的新闻链接。
 
-同时，需要定义常量 LINKS_PER_PAGE：
+同时，需要在 constants.js 文件中定义常量 LINKS_PER_PAGE，并将其引入 LinkList.js 文件：
 
 ```js
 export const LINKS_PER_PAGE = 5
 ```
 
-## 不同页面跳转
+## 不同页码间的跳转
 
-修改 LinkList.js，并添加两个用来翻页的按钮：
+修改 LinkList.js，添加两个用来翻页的按钮：
 
 ```JavaScript
 import React, { Component, Fragment } from 'react'
 import { LINKS_PER_PAGE } from '../constants'
-...
+
+// ...
 
 render() {
   return (
@@ -165,7 +168,9 @@ render() {
 }
 ```
 
-方法 _getLinksToRender：计算那些 links 将会被展示
+> 关于 React Fragment，[请戳这里](https://reactjs.org/docs/fragments.html)。
+
+方法 _getLinksToRender 用于计算哪些新闻链接将会被展示：
 
 ```JavaScript
 _getLinksToRender = data => {
@@ -179,9 +184,9 @@ _getLinksToRender = data => {
 }
 ```
 
-如果是 isNewPage，直接返回所有结果。但是如果用户加载的是 /top 路由，你就需要根据点赞数量将 link 排序
+如果 isNewPage 为 true，那么我们不需要修改列表，直接返回所有结果即可。但如果用户加载的是 `/top` 路由，你就需要根据点赞数量将新闻链接排序。
 
-下面来实现翻页的相关函数：
+下面我们来实现翻页相关的函数：
 
 ```JavaScript
 _nextPage = data => {
@@ -201,13 +206,15 @@ _previousPage = () => {
 }
 ```
 
-非常简单，只需要从现在的路由中获取页码然后直接修改路由即可。此时页面就会重新加载，然后获取到相应的内容。
+非常简单，只需要从当前页面 url 中获取页码，并计算将要跳转的页码是多少，然后使用 `this.props.history` 修改路由即可。此时页面就会重新加载，组件会再次根据路由信息获取到相应的参数。
 
-## 其他代码的调整
+## 其他一些代码调整
 
-需要更新 _updateCacheAfterVote 方法，因为修改了 FEED_QUERY，所以此时 store 的 readQuery 方法现在也希望得到 variables 参数。
+由于我们修改了 FEED_QUERY，所以此时 `store.readQuery` 也需要作出调整，否则 update 函数将无法正常工作。readQuery 现在也需要获取参数：`first, skip, orderBy`。
 
-> readQuery essentially works in the same way as the query method on the ApolloClient that you used to implement the search. However, instead of making a call to the server, it will simply resolve the query against the local store! If a query was fetched from the server with variables, readQuery also needs to know the variables to make sure it can deliver the right information from the cache.(啊？我在偷懒吗？那就读一读英语吧～其实挺好玩的～😜)
+> 注：ApolloClient 提供的 readQuery 方法其实和 query 方法的工作原理是一样的。但是，readQuery 并没有向服务端发起请求，而只是将本地 store 更新了！如果从服务端获取数据的请求结果是带参数的，那么 readQuery 方法也需要获取这些参数，以保证它能够正确的更新缓存信息。
+
+我们更新 _updateCacheAfterVote 方法如下：
 
 ```JavaScript
 _updateCacheAfterVote = (store, createVote, linkId) => {
@@ -228,11 +235,17 @@ _updateCacheAfterVote = (store, createVote, linkId) => {
 }
 ```
 
-CreateLink.js 文件也需要作出调整，因为它也用到了 store.readQuery：
+上面这段代码中，基于路由的不同（`/top` 或 `/new`），计算页码参数的方法也不同。
+
+最后，update 方法的实现也需要调整。
+
+打开 [CreateLink.js](https://github.com/howtographql/react-apollo/blob/master/src/components/CreateLink.js) 文件，修改 Mutation 组件：
 
 ```JavaScript
 import { LINKS_PER_PAGE } from '../constants'
-...
+
+// ...
+
 <Mutation
   mutation={POST_MUTATION}
   variables={{ description, url }}
@@ -257,4 +270,4 @@ import { LINKS_PER_PAGE } from '../constants'
 </Mutation>
 ```
 
-[self Proofreading +1]
+现在，你已经为应用增加了一个简单的分页功能，用户可以分段查看数据，而不必一次性加载全部数据了。
