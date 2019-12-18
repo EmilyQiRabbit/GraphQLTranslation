@@ -3,46 +3,40 @@
 > * 译者：[Yuqi🌸](https://github.com/EmilyQiRabbit)
 > * **欢迎校对** 🙋‍♀️🎉
 
-# Node.js 教程 - 简介
+# graphql-node 教程 - 简介
 
-> 注：教程的最终代码在 [GitHub](https://github.com/howtographql/graphql-js) 上，当你在下面章节的课程学习中感到困惑的时候，可以用它作为参考。同时还要注意，每个代码块都有一个文件名注释，这个注释可以直接链接到 GitHub 上相关源码文件，方便你查看当前代码的位置以及代码的最终形态。
+> 注：本教程最终代码可以在 [GitHub](https://github.com/howtographql/graphql-js) 上查看，如果你在接下来章节的学习过程中遇到了困惑，那么随时可以参考它。同时提醒大家，每个代码块前面都标注有文件名，它直接链接到 GitHub 上对应的文件里，这样你就能清楚的知道当前代码应该处于什么位置，以及最终完成的时候它应该是什么样子。
 
 ## 概览
 
-在后台技术中，GraphQL 可以算一颗冉冉升起的新星。它作为一个 API 设计规范，可以替代 REST，正逐渐成为用来暴露服务器数据和功能的新标准。
+在后台技术中，GraphQL 可算得上是一颗冉冉升起的新星。它也是一种 API 设计规范，并可以替代 REST，现在正逐渐成为用来暴露服务端数据和功能的新标准。
 
-在本教程中，你将会从零学习如何完整建立一个一般的 GraphQL 服务。我们将会用到如下技术：
+在 graphql-node 这部分教程中，我们将学习如何从零开始，完整建立一个比较通用的 GraphQL 服务。我们会用到的技术包括：
 
-* graphql-yoga：功能全面的 GraphQL 服务，专注于简单配置，高性能和高开发体验。建立在 Express，apollo-server，graphql-js 等之上。
+* [`graphql-yoga`](https://github.com/prisma/graphql-yoga)：功能全面的 GraphQL 服务，其配置简单，同时具有高性能和极佳的开发体验。它基于 [Express](https://expressjs.com)，[apollo-server](https://github.com/apollographql/apollo-server) 和 [graphql-js](https://github.com/graphql/graphql-js) 等。
 
-* Prisma：GraphQL 数据库代理，它可以将你的本地数据库转化为 GraphQL API。这个 API 能为你的数据模型提供强大的实时增删改查操作。
+* [Prisma](https://www.prisma.io)：用于替代传统 ORM（Object/Relational Mapping，即对象-关系映射）。可使用 Prisma 实现 GraphQL 的 resolver 函数，简化数据库访问。
 
-* graphql-config & GraphQL CLI：优化 GraphQL 相关工作流的工具。
+* [GraphQL Playground](https://github.com/prisma-labs/graphql-playground)：它是 “GraphQL IDE”，可以通过发送 query 和 mutation 请求对 GraphQL API 的功能进行交互性测试。它和可以测试 REST API 的 Postman 有些类似。但是 GraphQL Playground 还有更多功能，包括：
 
-* GraphQL bindings：处理 GraphQL API 的简便方法。binding 可以为每个 API 操作生成专用的 JavaScript 函数。
-
-* GraphQL Playground：它是 “GraphQL IDE”，允许通过发送请求和修改操作来互动测试 GraphQL API 的功能。有点像 Postman 测试 REST APIs。除了其他事项外，GraphQL Playground 还可以：
-
-  * 自动生成所有可用 API 操作的一份很全面的文档。
-  * 提供了一个编辑器，你可以在里面写入 queries，mutations，subscriptions，同时还有自动填充和语法高亮。
-  * 允许你方便的共享 API 操作。
+  * 自动为所有可用 API 生成一份全面的文档。
+  * 提供编辑器，你可以在里面写入 query，mutation 和 subscription，同时还有自动填充和语法高亮功能。
+  * 便捷共享 API 操作。
 
 ## 目标
 
-本教程的目的是为前端应用 Hacker News 的克隆版创建一个 API。以下是本教程目标内容的简要说明。
+本教程的目的是为前端应用：复制版 [Hacker News](https://news.ycombinator.com) 提供 API。以下是本教程内容简要说明。
 
-你将从学习 GraphQL 服务如何运行的基础开始学习，包括定义服务的 GraphQL schema 以及编写相关的 resolver 函数。一开始的时候，这些 resolver 将只处理内存中保存的数组 - 所以在服务停止运行的时候数据都不存在了。
+我们从 GraphQL 服务运行的基础开始学习，包括定义服务的 [GraphQL 模式（schema）](https://www.prisma.io/blog/graphql-server-basics-the-schema-ac5e2950214e)，以及编写相关的 resolver 函数。刚开始的时候，这些 resolver 只处理保存在内存中的数据 - 所以在服务停止运行的时候数据将被销毁。
 
-没人希望自己的服务没办法保存并维持数据，所以你还需要添加一个数据库层。数据库层由 Prisma 驱动，并且将会通过 Prisma bindings 链接你的 GraphQL server。你可以认为这些 binding 就是帮你妥善处理请求的 “GraphQL ORM（Object Relational Mapping - 对象关系映射）”。
+单没人希望自己的服务无法保存并维护数据，所以你还需要为系统添加一个数据库层。数据库层由 Prisma 驱动，通过 [Prisma 客户端](https://www.prisma.io/docs/prisma-client)与 GraphQL 服务连接。
 
-一旦连接了数据库链接，你将可以为 API 添加更多高级功能。
+一旦连接了数据库，你就可以为 API 添加更多高级功能。
 
-你将从实现登录注册功能开始，使用户能够根据 API 进行身份验证。这也将允许您检查用户对某些 API 操作的权限。
+我们将从实现登录注册功能开始，让用户能够使用 API 进行身份验证。这也将允许你检查用户对某些 API 操作的权限。
 
-教程的下一个部分是关于使用 GraphQL subscriptions 为 API 添加实时功能。
+教程的下一个部分是关于使用 GraphQL subscription 为 API 添加实时更新的功能。
 
-最后，你将允许 API 的请求者限制他们从 API 取回的项目列表，方法是添加过滤条件和分页能力。
+最后，我们将支持条件查询和分页功能，这就允许发起 API 请求的客户端可以限制从 API 返回的项目列表。
 
-让我们开始吧！ 🚀
-
-[self Proofreading +1]
+现在就开始吧 🚀

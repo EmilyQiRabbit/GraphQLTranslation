@@ -39,3 +39,5 @@ PS：最近本仓库正在持续的校对+更新中，fork 了的小伙伴记得
   * [条件过滤：查找符合条件的新闻链接列表](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/2-ReactApolloTutorial/7-Filtering-Searching-the-List-of-Links.md)
   * [使用订阅（subscription）实现实时更新](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/2-ReactApolloTutorial/8-Realtime-Updates-with-GraphQL-Subscriptions.md)
   * [分页](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/2-ReactApolloTutorial/9-Pagination.md)
+* graphql - node 教程
+  * [graphql-node 教程 - 简介](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/3-NodeJsTutorial/0-Introduction.md)
