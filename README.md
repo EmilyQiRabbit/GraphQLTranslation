@@ -41,3 +41,4 @@ PS：最近本仓库正在持续的校对+更新中，fork 了的小伙伴记得
   * [分页](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/2-ReactApolloTutorial/9-Pagination.md)
 * graphql - node 教程
   * [graphql-node 教程 - 简介](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/3-NodeJsTutorial/0-Introduction.md)
+  * [GraphQL-NODE 入门](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/3-NodeJsTutorial/1-GettingStarted.md)
