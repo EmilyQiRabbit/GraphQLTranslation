@@ -1,12 +1,15 @@
-# [HOW TO GRAPHQL](https://www.howtographql.com/basics/0-introduction/) 中文：一份向着标准版和专业版努力的翻译
+# [HOW TO GRAPHQL](https://www.howtographql.com/basics/0-introduction/) 中文版
+  —— 在向着标准版和专业版努力的翻译
 
-目前完成翻译的章节仅包括：
+目前完成翻译的章节包括：
 
 1. graphql 基础概念
 2. 前端 React + Apollo
 3. 后端 graphql + node
 
-[test 文件中 react-apollo 的相关源码戳这里!](https://github.com/howtographql/react-apollo)
+> 前端其他教程还包括 [React + urql](https://www.howtographql.com/react-urql/0-introduction/)；后端教程还包括：[graphql + elixir](https://www.howtographql.com/graphql-elixir/0-introduction/)，[graphql + ruby](https://www.howtographql.com/graphql-ruby/0-introduction/)，[graphql + java](https://www.howtographql.com/graphql-java/0-introduction/)，[graphql + python](https://www.howtographql.com/graphql-python/0-introduction/)，[graphql + scala](https://www.howtographql.com/graphql-scala/0-introduction/)。
+
+[test 文件中 react-apollo 的官方源码请戳这里](https://github.com/howtographql/react-apollo)
 
 Translated By Yuqi 🌸
 
