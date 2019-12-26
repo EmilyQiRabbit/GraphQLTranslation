@@ -5,13 +5,13 @@
 
 # Mutation 基础
 
-这一部分你将会学习如何为 GraphQL API 添加 mutation。这个 mutation 将允许客户端发起 post 方法在服务端添加一个新的 link。
+在这一章，我们将会学习如何为 GraphQL API 添加 mutation。客户端通过向该 mutation，能在服务端添加新的新闻链接。
 
-## 扩展 schema
+## 扩展模式定义
 
-和以前一样，首先需要在 GraphQL schema 定义中添加一种新的操作。
+和以前一样，首先需要在 GraphQL 模式定义中添加一种新的操作。
 
-在 index.js 中，添加类型定义：
+在 [index.js](https://github.com/howtographql/graphql-js/blob/master/src/index.js) 中，将 typeDefs 扩展为：
 
 ```js
 const typeDefs = `
@@ -32,17 +32,17 @@ type Link {
 `
 ```
 
-这时候，其实定义 schema 的代码已经变得有些长了。我们来重构一下代码，把 schema 放到一个单独的文件中：
+这时候，模式定义的代码已经有些长了。我们来重构一下代码，把模式定义放到一个单独的文件中：
 
 在 src 目录新建一个文件并命名为 schema.graphql：
 
-```
+```sh
 touch src/schema.graphql
 ```
 
-接下来把所有 schema 定义放在这个新的文件里：
+接下来把所有 schema 定义放在这个新的 [schema.graphql](https://github.com/howtographql/graphql-js/blob/master/src/schema.graphql) 文件里：
 
-```js
+```graphql
 type Query {
   info: String!
   feed: [Link!]!
@@ -59,9 +59,9 @@ type Link {
 }
 ```
 
-有了这个文件，index.js 文件就可以变得整齐一些了～
+然后，我们再来整理 index.js 文件。
 
-因为 schema 已经在新的文件里，所以可以删除 typeDefs 变量了。然后更新 GraphQLServer 的实例化代码：
+因为模式定义已经移动到了独立的文件里，所以可以删除 typeDefs 变量了。然后更新文件最下面 GraphQLServer 实例化代码：
 
 ```js
 const server = new GraphQLServer({
@@ -70,13 +70,13 @@ const server = new GraphQLServer({
 })
 ```
 
-很方便的一点是，GraphQLServer 实例化参数中的 typeDefs 可以像之前一样是一个字符串，或者也可以是一个包含 schema 定义的文件。
+实例话 GraphQLServer 的参数 typeDefs 可以像之前一样是一个字符串，或者也可以是一个包含模式定义的文件地址（也就是像上面这段代码这样），这一点非常方便。
 
 ## 实现 resolver 函数
 
-下一步就是实现新字段的 resolver 函数。
+下一步就是为新字段实现其 resolver 函数。
 
-更新 resolver 函数：
+更新 index.js 文件中的 resolver 函数为：
 
 ```js
 let links = [{
@@ -106,23 +106,23 @@ const resolvers = {
 }
 ```
 
-首先，注意到我们已经移除了 Link 的 resolver 函数，我们并不需要他们，因为 GraphQL 服务能够推断出 Link 的结构。
+首先，注意到我们已经移除了 Link 的 resolver 函数。我们并不需要它，因为 GraphQL 服务能够推断出 Link 的结构。
 
-下面我们按照注释的数字逐个讲解：
+下面我们依旧按注释的数字依次讲解：
 
-1. 添加了一个新的整型变量，为的是为每个新的 link 生成一个唯一的 id。
+1. 我们添加了一个新的整型变量 idCount，用来为每个新的 Link 元素生成一个唯一的 id。
 
-2. post resolver 的实现中，首先创建了一个新的 link 对象，然后把它添加到了已经存在的 links 列表中，最后返回了这个新的 link。
+2. 这段代码是 post 字段 resolver 函数的实现，首先我们创建了一个新的 link 对象，然后把它添加到了已经存在的 links 列表中，最后返回这个新的 link 对象，它代表新建的新闻链接。
 
-现在，我们正好可以讨论下，resolver 函数的第二个参数 args。
+现在我们正好可以讨论下，resolver 函数的第二个参数 args。
 
-这个参数携带了操作的参数：在这个例子中就是 Link 的 url 和 description。在之前的 resolver 中，我们并不需要它，因为相应的字段没有在 schema 定义中指定任何参数。
+这个参数携带了 API 操作的参数：在这个例子中就是新闻链接的的 url 和 description 字段。在之前的 feed 和 info 的 resolver 函数中我们并不需要它，因为模式定义中相应的字段没有定义任何参数。
 
 ## 测试 mutation
 
-启动服务，然后测试新的 API 吧。下面这是一个简单的 mutation 操作，你可以用 Playground 发送：
+启动服务，然后测试一下这个新的 API 吧。你可以使用 Playground 发送下面这个简单的 mutation 请求：
 
-```js
+```graphql
 mutation {
   post(
     url: "www.prisma.io"
@@ -133,9 +133,9 @@ mutation {
 }
 ```
 
-服务将会返回：
+服务端将会返回：
 
-```js
+```graphql
 {
   "data": {
     "post": {
@@ -145,17 +145,17 @@ mutation {
 }
 ```
 
-随着发送次数的增加，idCount 也增加，返回的 id 将会变成 link-2, link-3...
+随着发送次数的增加，idCount 也会跟着增加，返回的 id 将会变成 link-2，link-3 等等
 
-为了验证 mutation 成功运行了，你可以发送 feed 请求，服务将会返回所有你用 mutation 创建的 link。
+为了验证 mutation 成功运行了，你可以发送 query feed 请求，服务将会返回所有你用 mutation 请求创建的新闻链接列表。
 
-但是，当你重启服务后，之前你添加的 link 就都没有了，因为这些 link 就仅在服务运行时存在于内存中。在下一节中，你将会学习如何为 GraphQL 服务添加数据库层，这样你就能持久化你的变量了。
+但是，当你重启服务后，之前添加的新闻链接信息就都没有了，因为这些信息仅存储于内存中。下一章我们将会学习如何为 GraphQL 服务添加数据库层，这样你就能永久的保存数据了。
 
 ## 练习
 
-如果关于 resolver 函数，你想做更多的练习，这里有一个小小的挑战可以给你。基于现在的实现，将关于 link 的 GraphQL API 扩展成为完整的 CRUD（增删改查）功能。也就是实现如下的 schema 定义：
+如果你想做更多关于 resolver 函数的练习，这里有一个小小的挑战。基于当前的实现，扩展 Link 类型的 GraphQL API 的完整增删改查（CRUD）功能。即，为如下的模式定义实现 resolver 函数：
 
-```js
+```graphql
 type Query {
   # Fetch a single link by its `id`
   link(id: ID!): Link
@@ -169,5 +169,3 @@ type Mutation {
   deleteLink(id: ID!): Link
 }
 ```
-
-[self Proofreading +1]
