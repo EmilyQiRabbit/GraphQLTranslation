@@ -5,7 +5,7 @@
 
 # Mutation 基础
 
-在这一章，我们将会学习如何为 GraphQL API 添加 mutation。客户端通过向该 mutation，能在服务端添加新的新闻链接。
+在这一章，我们将会学习如何为 GraphQL API 添加 mutation。客户端通过该 mutation，能在服务端添加新的新闻链接。
 
 ## 扩展模式定义
 
