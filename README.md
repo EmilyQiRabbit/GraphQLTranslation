@@ -47,3 +47,4 @@ PS：最近本仓库正在持续的校对+更新中，fork 了的小伙伴记得
   * [GraphQL-NODE 入门](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/3-NodeJsTutorial/1-GettingStarted.md)
   * [Query 基础](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/3-NodeJsTutorial/2-ASimpleQuery.md)
   * [Mutation 基础](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/3-NodeJsTutorial/3-ASimpleMutation.md)
+  * [为服务添加数据库](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/3-NodeJsTutorial/4-AddingADatabase.md)

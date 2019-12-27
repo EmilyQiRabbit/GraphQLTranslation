@@ -3,258 +3,154 @@
 > * 译者：[Yuqi🌸](https://github.com/EmilyQiRabbit)
 > * **欢迎校对** 🙋‍♀️🎉
 
-# 添加数据库
+# 为服务添加数据库
 
-在这一部分，你将会建立 Prisma 服务和数据库连接。
+这一章我们将会学习搭建 Prisma 服务并连接数据库，然后将其应用于 GraphQL 服务。
 
-## 为什么选择 Prisma
+## 为何选择 Prisma
 
-目前为止，你已经知道了 GraphQL 服务的基本原理，非常简单的是吧？这正是 GraphQL 美好之处，只需要遵循简单几条规则。强类型模式的 schema 和能 resolve query 的 GraphQL 引擎，避免了 API 开发中的常见痛点。
+学到这一章，我们已经了解了 GraphQL 服务运作的基本原理，其实是非常简单的是吧？这正是 GraphQL 之美，它只需要遵循简单几条规则。强类型模式和服务内能够解析请求的 GraphQL 引擎，能够排除 API 开发中常见的痛点。
 
-接下来，构建 GraphQL 服务的难点在哪里呢？
+所以，构建 GraphQL 服务的难点是什么呢？
 
-在实际应用中，你可能会遇到很多情境，这些情境下，resolver 的实现可能会非常复杂。尤其是当 GraphQL 的请求有很深的嵌套、那么 resolver 的实现可能就会比较 tricky，也容易导致性能问题。
+在实际应用中，开发者可能会遇到很多实现 resolver 函数会变得非常复杂的场景。尤其是因为 GraphQL 请求可以嵌套很深，这时实现 resolver 函数会变得很棘手，并容易导致性能问题。
 
-大多数时候，你经常还需要考虑其他很多附加的工作流，比如认证、权限、分页、过滤操作、实时和第三方的服务或者遗留的服务整合等等。
+大多数时候，你经常还需要考虑其他很多附加的工作流，比如认证、权限、分页、过滤操作、实时更新，以及整合第三方的服务或者历史遗留服务等等。
 
-通常，当实现 resolver 并连接数据库的时候，你有两个选择、但是这两个都不很完美：
+通常情况下，实现 resolver 函数并连接数据库时你会有两个选择 —— 但是这两个都不很完美：
 
-1. 直接连接数据库（写 SQL 或者用其他非 SQL 数据库 API）。
+1. 通过写 SQL 或者用其他非 SQL 数据库的 API。直接访问数据库。
 
-2. 使用 ORM（Object-relational mapping），它可以提供数据库摘要，让你能够直接从代码中访问。
+2. 使用 [ORM](https://en.wikipedia.org/wiki/Object-relational_mapping)（即 Object-relational mapping），它可为开发者提供数据库摘要，让开发者能够直接从代码中访问数据库。
 
-第一个方案是存在问题的，因为在 resolver 中直接处理 SQL 非常复杂，很容易导致代码难以维护。另一个问题是，SQL 请求经常是以字符串的形式提交到数据库。字符串没有任何结构可言，它们就是一系列字符。所以，你的工具没办法帮你发现代码中可能的错误，也没办法提供像自动填充这样的附加功能。那么这样，写 SQL 语句就非常棘手、非常容易出错。
+第一个方案是存在问题的：因为在 resolver 函数中直接处理 SQL 非常复杂，代码很快就会难以维护。另一个问题是 SQL 请求经常是以纯字符串的形式提交到数据库。字符串就是一系列字符，它没有任何结构可言。所以，你的工具没办法帮你发现代码中可能的错误，也没办法提供像自动填充这样的附加功能。因此写 SQL 语句就非常棘手，也非常容易出错。
 
-第二个方案使用了 ORM，可能你会觉得是个不错的选择。但是，这个方案也存在缺点。ORMs 通常存在这样的问题：它实现相对简单的数据库访问是可选的解决方案，但是由于 GraphQL 查询的复杂性以及可能出现的各种边界情况，此时 ORM 就无法正常工作了。
+第二个方案使用了 ORM，刚开始你可能会觉得是个不错的选择。但这个方案也存在缺点：当实现相对简单的数据库访问时，ORM 是可选的解决方案，但是由于 GraphQL 查询的复杂性以及可能出现的各种边界情况，ORM 就可能会出现问题。
 
-Prisma 提供了 GraphQL 查询引擎来专门处理 resolve 请求，从而解决了这个问题。当使用 Prisma 的时候，解析器的运行，其实只是将传入的查询委托给底层的 Prisma 引擎。多亏了 Prisma bindings，请求委托将会是一个很简单的过程，所有的 resolver 都可以用一行代码就实现。
-
-> Prisma binding 基于 schema 的委托和拼接的思想。本教程中，我们将不会深入到这些技术的细节，如果你想了解更多，可以看看下面这两篇文章：
-> [GraphQL Schema Stitching explained: Schema Delegation](https://blog.graph.cool/graphql-schema-stitching-explained-schema-delegation-4c6caf468405)
-> [Reusing & Composing GraphQL APIs with GraphQL Bindings](https://blog.graph.cool/reusing-composing-graphql-apis-with-graphql-bindings-80a4aa37cff5)
+为了解决这些问题，Prisma 提供了使用方便的数据访问层，它将会帮助你解析请求。当使用 Prisma 的时候，你所实现的 resolver 函数将会把传入的请求转发给 Prisma 引擎，并由 Prisma 引擎负责根据数据库中的数据解析请求。由于有了 [Prisma 客户端](https://www.prisma.io/docs/prisma-client/)，这个过程将会非常简单，所有的 resolver 函数只需一行代码就能实现。
 
 ## 结构
 
-下面这个图就是使用 Prisma 构建 GraphQL 服务时的结构。
+如图展示的，是使用 Prisma 构建 GraphQL 服务的结构：
 
 ![graphql9](../imgs/graphqlpic9.png)
 
-知道这个结构非常重要，在这个结构中你需要处理两个(!) GraphQL API 层。
+Prisma 服务提供了应用的数据访问层，通过 Prisma，API 服务和数据库之间的交互变得容易了很多。Prisma 服务 API 将会被嵌入在 API 服务实现中的 Prisma 客户端访问（和 ORM 类似）。这里的 API 服务就是前几章中我们学习使用 `graphql-yoga` 构建的服务。
 
-### 应用层
+Prisma 的本质就是让你能轻松的将 API 服务中的 GraphQL resolver 函数和数据库连接起来。
 
-第一个 GraphQL API 就是在前几篇教程中你已经开始搭建的部分。这个是应用层的 GraphQL API。它定义了客户端应用将要访问的 API。在这一层你可以实现事物逻辑、工作流、认证和授权或者和第三方服务整合。应用层的 API 在 src/schema.graphql 文件中由 GraphQL schema 定义 - 从现在起我们就将这个 schema 称为**应用 schema**。
+## 基于示例数据库，建立 Prisma 服务
 
-### 数据库层
+这部分教程中，我们将会学习如何从零开始，搭建一个完整的服务！而关于 Prisma 配置，我们将从尽可能最简单的开始。
 
-第二个 GraphQL API 是 Prisma 提供的，它提供了数据库层。这个基本上就是一个基于 GraphQL 的数据库接口，帮你省去了写 SQL 的繁琐。那么，这个 GraphQL API 是什么样子呢？
+首先我们需要创建两个文件，它们位于一个新的目录 prisma 下。
 
-Prisma API 是一个镜像数据库 API，所以它允许你对特定数据类型进行增删改查的操作。什么数据类型将取决于你 - 你可以用你很熟悉的 SDL 定义这些数据类型。后面你将会学习它是如何工作的。
+首先创建 prisma 目录，然后创建两个文件 prisma.yml 和 datamodel.graphql。执行如下命令：
 
-通常情况下，这些数据类型代表了你应用的实体。比如，你正在搭建一个汽车经销商软件，那你就可能会有 Car, CarDealer, Customer 这样的数据类型。所有这样的数据类型的集合就是你的数据模型。
-
-一旦你的数据模型定义了，Prisma 就会把它翻译为一个相应的数据库 schema，然后基于此配置好数据库。当你接下来向 Prisma GraphQL API 发送 queries 和 mutations 时，它就会自动的把这些翻译为数据库操作然后运行这些操作。简单明了哈～
-
-之前我们已经学习了，所有的 GraphQL APIs 都有一个 GraphQL schema 来支持。所以谁来为 Prisma GraphQL API 提供 schema 呢？答案是，它将会基于你提供的数据模型被自动生成。所以，这个 schema 也被称为 Prisma database schema。
-
-这是一个例子，考虑一个很简单的数据模型，它有一个 User 类型：
-
-```js
-type User {
-  id: ID! @unique
-  name: String!
-}
+```sh
+mkdir prisma
+touch prisma/prisma.yml
+touch prisma/datamodel.graphql
 ```
 
-> 先别管 @unique 标识，我们后续会说。
+prisma.yml 是 Prisma 服务的主要配置文件。datamodel.graphql 则包含了[数据模型](https://www.prisma.io/docs/-knul)的定义。Prisma 数据模型定义了应用的模型。每个模型都和数据库中的表关联。
 
-基于这个数据模型，Prisma 将会生成一个像这样的 GraphQL schema：
+到目前为止，你的 Hacker News 应用只包含了一种数据模型：Link。由于 Prisma 的模型定义也使用了 [GraphQL SDL](https://www.prisma.io/blog/graphql-sdl-schema-definition-language-6755bcb9ce51)，你可以将 Link 的定义直接从 schema.graphql 拷贝到 datamodel.prisma：
 
-```js
-type Query {
-  users(where: UserWhereInput, orderBy: UserOrderByInput, skip: Int, after: String, before: String, first: Int, last: Int): [User]!
-  user(where: UserWhereUniqueInput!): User
-}
+打开 [datamodel.graphql](https://github.com/howtographql/graphql-js/blob/master/prisma/datamodel.prisma) 并添加如下代码：
 
-type Mutation {
-  createUser(data: UserCreateInput!): User!
-  updateUser(data: UserUpdateInput!, where: UserWhereUniqueInput!): User
-  deleteUser(where: UserWhereUniqueInput!): User
-}
-
-type Subscription {
-  user(where: UserSubscriptionWhereInput): UserSubscriptionPayload
-}
-```
-
-实际上的 schema 还要更大一些 - 这里为了简单期间我们就只包含了三个 root 类型以及简单的增删改查操作。但是其实 API 还允许其他很多操作（比如批量更新和删除）。如果你感兴趣，可以查看[这里](https://gist.github.com/gc-codesnippets/3f4178ad93c51d03195c92ce119d444c)。
-
-### 为什么不直接使用 Prisma GraphQL API？
-
-Prisma 其实就是一个数据库接口。如果你直接用前端或者移动端连接 Prisma，那就像是直接连接数据库了。
-
-在极少的情况下，也许这也是个选择：但是大多数的应用还是必须要一个不仅仅包含增删改查的附加的逻辑层（数据校验、权限、第三方服务整合等等都需要在这一层处理）。
-
-将 Prisma 接口直接暴露给客户端的另一个潜在问题就是安全性。GraphQL 的工作方式就是，谁能够访问 GraphQL 接口终端，谁就能够从这个端口追溯整个 schema。这被称为：内省。如果你的客户端直接和 Prisma 连接，那么通过检查网络请求就能很简单的获取到 Prisma API 的端口，然后所有用户都能看到你数据库的所有 schema 了。
-
-> 最近，关于是否应该限制自省功能一直有争论，但是目前为止还没有什么方案。
-
-## 基于一个已连接的数据库，建立 Prisma 服务
-
-在这部分教程中，你将会从头开始并搭建好一切！关于 Prisma 数据库服务，你将从可能的最简单的设置开始。
-
-首先，需要创建两个文件，这两个文件放在一个新的目录下，目录的名字是 database。
-
-这两个文件的名字是 prisma.yml 和 datamodel.graphql，创建的方式就是在命令行执行如下代码：
-
-```
-mkdir database
-touch database/prisma.yml
-touch database/datamodel.graphql
-```
-
-prisma.yml 是你的 Prisma 数据库服务的主要配置文件。datamodel.graphql 则包含了数据模型的定义，它将会是 Prisma 生成 GraphQL CRUD API 的基础。
-
-目前位置，你的 Hacker News app 的数据模型可能只包含一种数据类型：Link。事实上，你可以直接把 Link 的定义从 schema.graphql 拷贝到 datamodel.graphql。
-
-打开 datamodel.graphql 并添加如下代码：
-
-```js
+```graphql
 type Link {
-  id: ID! @unique
-  createdAt: DateTime!
+  id: ID! @id
+  createdAt: DateTime! @createdAt
   description: String!
   url: String!
 }
 ```
 
-相比于之前 schema.graphql 中的 Link，这里的 Link 有两个主要的区别。
+和 schema.graphql 文件中 Link 定义相比，这里有两个主要的区别。
 
-首先，在 id: ID! 的后面添加了 @unique 标识。这个标识告诉 Prisma：任何两个数据库中的 Link 元素的这个字段都不能重复。实际上，id: ID! 在 Prisma 数据模型中是一个很特殊的字段，因为 Prisma 将会自动的生成全局唯一 ID 并提供给有这个字段的数据。
+首先，在 id: ID! 的后面添加了 @id 标识。这个标识意味着 Prisma 将会在数据库中，为 Link 的 id 字段自动生成并保存全局唯一 ID。
 
-其次，我们还添加了一个新的字段：createdAt: DateTime!。这个字段也是 Prisma 负责管理的，并且在 API 中是只读的。它存储了每个 Link 被创建的时间。注意，Prisma 还提供另一个相似的字段，updatedAt: DateTime：它存储了 Link 的最后更新时间。
+其次，我们还添加了一个新的字段：`createdAt: DateTime! @createdAt`。这个字段也是由 Prisma 负责管理的，并且在 API 中是只读的。它存储了每个 Link 类型的数据被创建的时间。你还可以使用 `@updatedAt` 来标记字段，此时 Prisma 将会记录数据最后更新的时间。
 
-现在，我们来看看你需要如何处理 prisma.yml：
+现在，我们来看看如何处理 prisma.yml。
 
-添加如下的内容：
+在 prisma.yml 中添加如下的内容：
 
-```
+```yml
 # The HTTP endpoint for your Prisma API
 endpoint: ''
 
-# Points to the file that holds your data model
-datamodel: datamodel.graphql
+# Points to the file that contains your datamodel
+datamodel: datamodel.prisma
 
-# You can only access the API when providing JWTs that are signed with this secret
-secret: mysecret123
+# Specifies language & location for the generated Prisma client
+generate:
+  - generator: javascript-client
+    output: ../src/generated/prisma-client
 ```
 
-想要学习更多关于 prisma.yml 的结构，可以查看[文档](https://www.prisma.io/docs/reference/service-configuration/prisma.yml/yaml-structure-ufeshusai8/)
+想要学习更多关于 prisma.yml 的结构，可以查看[官方文档](https://www.prisma.io/docs/-5cy7#reference)
 
-这里是关于上面这个文件的快速解析：
+这里是对代码的简单解析：
 
-* endpoint：Prisma API 的 HTTP 接口。在部署时需要。当部署的时候将会生成。
+* endpoint：Prisma API 的 HTTP 接口。
 
-* datamodel：指出数据模型的位置，它是 Prisma 增删改查接口的基础。
+* datamodel：指明数据模型的存储位置，它是 Prisma API 接口的基础。
 
-* secret：为了保护你的 Prisma 服务，要求对 Prisma 发起的请求都必须需要做认证。这个 secret 用来签署 JWTs，它需要被包含在向 Prisma 发起的 HTTP 请求的 Authorization 头部。[阅读这里](https://www.prisma.io/docs/reference/prisma-api/concepts-utee3eiquo/#authentication)了解更多。
+* generate：定义生成 Prisma 客户端的语言，以及存储的位置。
 
-下一步，就是安装 Prisma CLI，用于管理 Prisma 服务。
+部署服务之前，还需要安装 Prisma CLI。
 
-在终端运行如下命令
+在终端运行如下命令，全局安装 Prisma CLI：
 
-```
+```sh
 yarn global add prisma
 ```
 
-好了～现在你终于准备好可以部署你的 Prisma 服务了，同时你将连接到数据库。
+完成了，现在万事具备，可以部署这个连接了数据库的 Prisma 服务了 🙌！注意，本篇教程将会使用一个位于 Prisma 云端的免费的示例数据库 [AWS Aurora](https://aws.amazon.com/de/rds/aurora/)。如果你想要学习更多关于本地配置 Prisma，或使用本地数据库的方式，可以查看[这篇文档](https://www.prisma.io/docs/-a002/)。
 
-在 database 目录下运行 prisma deploy。
+下面我们在 hackernews-node 目录下执行 prisma deploy：
 
-命令将会引导一段交互过程：
+```sh
+prisma deploy
+```
+
+命令将会开始一个需要交互的过程：
 
 1. 首先选择 Demo server。在弹出的浏览器中使用 Prisma Cloud 注册然后回到控制台。
 
-2. 然后需要选择 demo server 的区域。然后你可以直接按回车来使用服务推荐的配置值。
+2. 然后需要选择 Demo server 的区域。你可以直接按两次回车来使用服务推荐的配置值。
 
-> Prisma 是开源的，它基于 Docker，意味着你可以部署在你选择的任何一个云服务上。如果你不想要处理 DevOps 和 Docker 的手工配置，你也可以使用 Prisma Cloud 来运行一个私人的 cluster 用于部署服务。具体可以查看这段[视频](https://www.youtube.com/watch?v=jELE4KXJPn4)。
+> 注：Prisma 是开源的，你可以使用 Docker 部署在任何一个云服务上。
 
-在 CLI 的指示中选择任何一个 Development cluster 选项然后按回车（如果你本地有安装 Docker，你也可以在本地部署）。
+命令执行结束后，CLI 会将 Prisma API 的端口写入到 prisma.yml 文件中，它差不多会像这样：https://eu1.prisma.sh/john-doe/hackernews-node/dev
 
-一旦命令运行结束，CLI 会输出 Prisma GraphQL API 的端口，它差不多会像这样：https://eu1.prisma.sh/public-graytracker-771/hackernews-node/dev
+最后一步是为数据模型生成 Prisma 客户端。Prisma 客户端是一个自动生成的客户端仓库，它让开发者可以通过 Prisma API 从数据库中读写数据。你可以使用 prisma generate 命令生成该客户端。这个命令将会根据 prisma.yml 文件中的信息生成 Prisma 客户端。
 
-URL 的组成：
+在 /prisma 目录下执行：prisma generate
 
-* eu1.prisma.sh：cluster 的域名
-* public-graytracker-771：随机生成的服务 ID
-* hackernews-node：来自 prisma.yml 的服务名
-* dev：来自 prisma.yml 的开发阶段（stage）
-
-注意到，CLI 也在 prisma.yml 中添加了一个 cluster 属性。因此在之后的部署中，你就不会再次被提示确认服务部署的地址了 - CLI 将会从 prisma.yml 中读取这个地址。但是如果你把这个属性移除，CLI 就又会重新显示提示。
-
-## 探索 Prisma 服务
-
-点击打开刚才 CLI 输出的 URL，继续 Prisma 数据库 API 的探索。
-
-> 注意：如果你不小心丢失了端口地址，你可以在终端运行 prisma info 来重新获取 URL。
-
-但是、点击 URL 后你将看到这样一段报错信息：
+现在，Prisma 客户端已经生成，并保存于 `hackernews-node/src/generated/prisma-client` 目录下。你要在需要它的地方，导入 prisma 实例。这是一段 nodejs 的示例代码：
 
 ```js
-{
-  "errors": [
-    {
-      "message": " Your token is invalid. It might have expired or you might be using a token from a different project.",
-      "code": 3015,
-      "requestId": "api:api:cjfcbpal10t6w0b91idqif941"
-    }
-  ]
+const { prisma } = require('./generated/prisma-client')
+
+async function main() {
+
+  // Create a new link
+  const newLink = await prisma.createLink({ 
+    url: 'www.prisma.io',
+    description: 'Prisma replaces traditional ORMs',
+  })
+  console.log(`Created new link: ${newLink.url} (ID: ${newLink.id})`)
+
+  // Read all links from the database and print them to the console
+  const allLinks = await prisma.links()
+  console.log(allLinks)
 }
+
+main().catch(e => console.error(e))
 ```
 
-还记得我们之前说过，你的 Prisma API 会被来自 prisma.yml 的密码保护嘛？这就是为什么这里会报错：Playground 试图从端口加载 GraphQL schema，但是请求没有被授权。让我们稍作修改。
-
-在 database 目录下，运行如下代码来生成一个授权 token，它有 prisma.yml 密码的签名。
-
-```
-prisma token
-```
-
-拷贝 CLI 输出的这个 token，然后用它来在 Playground 中配置 HTTP 的头部信息。你也可以用 Playground 左下角的 HTTP HEADERS 面板来完成 -- 注意，你需要将 `__TOKEN__` 占位符用刚才生成的 token 替换掉。
-
-```
-{
-  "Authorization": "Bearer __TOKEN__"
-}
-```
-
-几秒钟后，Playground 就将会加载 schema，你就能够向 Prisma API 发送授权请求了。打开文档，就可以看到可用的 API 操作了。
-
-如果你还想继续探索，还可以发送如下的 mutation 和 query 来创建一个新的 link、并查看所有 link 的列表：
-
-创建新的 Link：
-
-```js
-mutation {
-  createLink(data: {
-    url: "www.prisma.io"
-    description: "Prisma turns your database into a GraphQL API"
-  }) {
-    id
-  }
-}
-```
-
-加载所有 link 元素：
-
-```js
-query {
-  links {
-    id
-    url
-    description
-  }
-}
-```
-
-[self Proofreading +1]
+下一章，我们将会升级 GraphQL 服务的 API，并在 resolver 函数中使用 Prisma 客户端访问数据库。
