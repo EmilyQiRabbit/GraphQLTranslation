@@ -5,26 +5,26 @@
 
 # 认证
 
-本篇教程将会实现注册和登录，用户可以通过 GraphQL 服务认证了。
+本篇教程，我们将会学习如何实现注册和登录功能，这样用户就可以通过 GraphQL 服务完成认证。
 
-## 在数据 modal 中添加 User 类型
+## 添加 User 模型
 
-首先，你需要一个能够在数据库中表示用户数据的字段。解决方法就是在 datamodel 中添加 User 类型。
+首先，我们需要一个数据库用来代表用户数据的方式。即在 Prisma datamodel 中添加 User 类型。
 
-同时也需要在 User 和 Link 之间建立联系，来表示 Link 是哪个用户发起的。
+同时也需要在 User 和 Link 之间添加关联，用来表示新闻链接 Link 是由用户 User 创建的。
 
-打开文件：database/datamodel.graphql，添加如下代码：
+打开文件：`database/datamodel.graphql`，添加如下代码：
 
 ```js
 type Link {
-  id: ID! @unique
+  id: ID! @id
   description: String!
   url: String!
   postedBy: User
 }
 
 type User {
-  id: ID! @unique
+  id: ID! @id
   name: String!
   email: String! @unique
   password: String!
@@ -32,24 +32,25 @@ type User {
 }
 ```
 
-这里，在 Link 中添加了一个 postedBy 字段，指向 User 实例。User 类型则有一个 links 字段表示一个 Link 的数组。这是一个一对多的关系。
+我们为 Link 类型添加了一个 postedBy 字段，它指向一个 User 实例。为 User 类型则添加了 links 字段，它是一个 Link 类型实例的数组。这是一个使用 SDL 表述的一对多关系。
 
-修改 data model 后，需要重新部署 Prisma 来应用这些改变。
+修改 datamodel 文件后，需要重新部署 Prisma 来应用这些修改，同时也会修改数据库模式。
 
-在项目的根目录下运行：
-```
+在项目的根目录 hackernews-node 下运行：
+
+```sh
 prisma deploy
 ```
 
-部署后，Prisma database schema 和 Prisma 服务的 API 都会被更新。这个 API 现在也会同时暴露出 User 类型的增删改查操作，以及根据指定的关系连接和断开 User 和 Link 的操作。
+此时 Prisma API 已被更新。同时，Prisma 客户端会在命令运行完成后自动生成，它暴露了新添加的 User 模型的所有增删改查方法。
 
-## 扩展应用 schema
+## 扩展 GraphQL 模式
 
-还记得 schema 驱动开发的过程吗？它是从用你想要添加到 API 的新的操作、来扩展 schema 的定义开始的 —— 在这个例子中，就是注册和登录的 Mutation。
+还记得模式驱动开发的过程吗？一切都是从使用新的 API 操作来扩展模式定义开始的 —— 在这个例子中，新的 API 就是注册/登录 mutation 请求。
 
-打开应用 schema：src/schema.graphql 文件，更新 Mutation：
+打开应用模式定义文件 [src/schema.graphql](https://github.com/howtographql/graphql-js/blob/master/src/schema.graphql)，更新 Mutation 类型：
 
-```
+```graphql
 type Mutation {
   post(url: String!, description: String!): Link!
   signup(email: String!, password: String!, name: String!): AuthPayload
@@ -57,9 +58,9 @@ type Mutation {
 }
 ```
 
-下一步，在 src/schema.graphql 添加 AuthPayload 和 User 类型的定义：
+下一步，在文件中添加 AuthPayload 和 User 类型的定义：
 
-```
+```graphql
 type AuthPayload {
   token: String
   user: User
@@ -73,19 +74,26 @@ type User {
 }
 ```
 
-注册和登录 mutation 行为其实非常类似。两者都返回注册（或登录）用户的信息和一个 token 信息，它可以用来认证后续的对 API 的请求。这个信息捆绑在 AuthPayload 类型中。
+注册和登录 mutation 请求的行为其实非常类似。两者都返回注册（登录）的用户信息和 token，该 token 可以用来认证后续的 API 请求。这个信息被打包在 AuthPayload 类型中。
 
-等一下？为什么你现在又一次定义了 User 类型？类型不能从 Prisma 数据库的 schema 中导入吗？答案是当然可以！
+不能忘了，我们还需要在 src/schema.graphql 文件的定义中，为 Link 模型添加 postedBy 字段，来完成 User 和 Link 关系的双向绑定：
 
-但是，在这个例子中，你重新定义 User 来在 App schema 中隐藏它的部分信息。比如，密码字段（正如你将会看到的：你将会用哈希版本来保存密码——所以，即使它在这里暴露出来，客户也无法直接查询它）。
+```graphql
+type Link {
+  id: ID!
+  description: String!
+  url: String!
+  postedBy: User
+}
+```
 
 ## 实现 resolver 函数
 
-在扩充了 schema 定义之后，我们就需要为它实现 resolver 函数了。在这之前，先完成代码重构，让它更加模块化。
+扩充模式定义后，我们还需要为它们实现相应的 resolver 函数。在此之前，我们先对代码进行重构，让代码更加模块化。
 
-将每个类型的 resolver 都提取出来放到单独的文件里。
+我们将每个类型的 resolver 都提取出来放到单独的文件里。
 
-首先，创建一个名为 resolvers 的文件，然后添加三个文件：Query.js、Mutation.js 和 AuthPayload.js。可以用以下命令完成：
+首先，创建一个名为 resolvers 的文件，然后添加三个文件：`Query.js`，`Mutation.js` 和 `AuthPayload.js`。可以用以下命令完成：
 
 ```sh
 mkdir src/resolvers
@@ -108,18 +116,18 @@ module.exports = {
 }
 ```
 
-很简洁明了，就只是将之前同样的函数移动到了各自专门的文件中。接下来是 Mutation resolver。
+非常简洁明了，只是通过使用不同文件中的专用函数，来重新实现和之前一样的功能。接下来是 Mutation 的 resolver 函数。
 
-打开 Mutation.js 文件然后添加 login 和 signup resolver 函数（post resolver 稍后再添加）：
+### 添加认证相关的 resolver 函数
+
+打开 Mutation.js 文件然后添加 login 和 signup 的 resolver 函数（post 的 resolver 函数我们稍后再添加）：
 
 ```js
 async function signup(parent, args, context, info) {
   // 1
   const password = await bcrypt.hash(args.password, 10)
   // 2
-  const user = await context.db.mutation.createUser({
-    data: { ...args, password },
-  }, `{ id }`)
+  const user = await context.prisma.createUser({ ...args, password })
 
   // 3
   const token = jwt.sign({ userId: user.id }, APP_SECRET)
@@ -133,7 +141,7 @@ async function signup(parent, args, context, info) {
 
 async function login(parent, args, context, info) {
   // 1
-  const user = await context.db.query.user({ where: { email: args.email } }, ` { id password } `)
+  const user = await context.prisma.user({ email: args.email })
   if (!user) {
     throw new Error('No such user found')
   }
@@ -154,74 +162,31 @@ async function login(parent, args, context, info) {
 }
 
 module.exports = {
-    signup,
-    login,
-    post,
+  signup,
+  login,
+  post,
 }
 ```
 
-下面，我们来根据标号逐一解释一下上面的代码，从 signup 开始。
+下面，我们来根据标号逐一解释一下这段代码，从 signup 开始。
 
-1. signup Mutation 中，做的第一件事就是解码用户密码，所用工具是 bcryptjs 库。这个库稍后需要安装。
+1. 在 signup mutation 中，我们首先使用 bcryptjs 解码用户密码。这个库稍后需要安装。
 
-2. 下一步，使用 Prisma 绑定了的实例，在数据库保存新用户。注意到这里在 selection set 中 id 采用了硬编码。后续我们再深入讨论这一步。
+2. 下一步，使用 Prisma 客户端实例，在数据库保存新用户信息。
 
-3. 生成了一个带有 APP_SECRET 签名的 JWT。后续你将需要创建这个 APP_SECRET 并安装 jwt 库。
+3. 接下来我们生成了一个带有 APP_SECRET 签名的 JWT。后续我们还需要创建这个 APP_SECRET 并安装 jwt 库。
 
-4. 最后，返回了 token 和创建了的 user。
+4. 最后，使用 AuthPayload 类型对象返回 token 和已经创建了的 user 信息。
 
 现在来看 login mutation：
 
-1. 这次不是创建用户，而是用 Prisma 的绑定实例来根据 login mutation 一同发送来的 email 信息查找已经存在的用户记录。如果没有发现同样的用户邮箱，就返回一个相关的错误。注意到，这次你将会同时在 selection set 中加入 id 和 password。密码当然是必须的，因为你需要用它和 login mutation 发来的密码做比对。
+1. 这次不是创建用户，而是使用 Prisma 客户端实例，根据发送来的 login mutation 的参数 email 信息查找已经存在的用户记录。如果没有找到该用户邮箱，就返回相应的错误。
 
-2. 下一步就是比较 mutation 提供的密码以及存储在数据库中的密码。如果两者不匹配，也需要返回错误。
+2. 下一步，对照 mutation 提供的密码以及存储在数据库中的密码。如果两者不匹配，也需要返回错误。
 
-3. 最后，依旧是返回 token 和 user。
+3. 最后，依旧是返回 token 和 user 信息。
 
-两个 resolver 的实现都非常简单直接。最后一个还没搞清楚的问题就是 signup 的 selection set 硬编码中包含 id 字段。如果 signup mutation 还要求了更多的用户信息，会怎样呢？
-
-## 添加 AuthPayload resolver
-
-例如，考虑到如下这个在 GraphQL schema 中定义了的 mutation：
-
-```js
-mutation {
-  login(
-    email: "sarah@graph.cool"
-    password: "graphql"
-  ) {
-    token
-    user {
-      id
-      name
-      links {
-        url
-        description
-      }
-    }
-  }
-}
-```
-
-这就是一个正常的 login mutation，但是需要服务器返回正在登录的用户的相关信息。那么 mutation 的这个 selection set（选择集合）应当如何解析呢？
-
-目前的 resolver 实现只能返回用户 id，其他的信息均不返回。解决方案就是，实现一个附加的 AuthPayload resolver 函数，并取回 mutation 所要求的数据。
-
-打开 resolver 目录下的 AuthPayload.js 文件并添加如下代码：
-
-```js
-function user(root, args, context, info) {
-  return context.db.query.user({ where: { id: root.user.id } }, info)
-}
-
-module.exports = { user }
-```
-
-这里就是 login mutation 的 selection set（选择集合）如何解析并从数据库获取数据的。
-
-> 注意：一开始就理解这里可能会有些困难。想要深入了解，可以参考这篇 [Github issue](https://github.com/prismagraphql/prisma/issues/1737) 或者阅读这篇[博客](https://www.prisma.io/blog/graphql-server-basics-demystifying-the-info-argument-in-graphql-resolvers-6f26249f613a/)。
-
-下面我们继续完成功能的实现。
+我们还要完成余下的步骤。
 
 首先，为项目添加必要的依赖：
 
@@ -229,15 +194,13 @@ module.exports = { user }
 yarn add jsonwebtoken bcryptjs
 ```
 
-然后，创建一些可复用的工具方法：
-
-目录 src 下创建文件 utiles.js
+添加工具函数：首先在根目录下执行如下代码。
 
 ```sh
 touch src/utils.js
 ```
 
-然后粘贴如下代码：
+然后在该文件中添加代码：
 
 ```js
 const jwt = require('jsonwebtoken')
@@ -260,11 +223,11 @@ module.exports = {
 }
 ```
 
-APP_SECRET 用来为分发给用户的 jsts 签名。它完全依赖于 prisma.yml 中定义的 secret。事实上，它和 Prisma 没有什么关系，如果你换一种方式来实现数据库层，APP_SECRET 也还是一样的使用方法。
+APP_SECRET 将会用作 JWT 签名，然后我们将其发行给用户。
 
-getUserId 是一个辅助函数，你将会在需要认证的 resolver 中调用它。它首先会从 http 请求中取回包含用户 jwt 的 Authorization 头部信息。然后认证 jwt 并从中取得用户 id。注意到这一步可能不一定会成功执行，那么函数就会抛出一个错误。因此你也就能够利用它“保护”请求认证的 resolver。
+getUserId 是一个辅助函数，你可以在需要认证的 resolver 函数中调用它。它首先会从 context 中取出认证头部信息 Authorization。然后认证 jwt 并从中取得用户 id。注意到这一步不一定能执行成功，失败时函数就会抛出一个错误。这样你就能“保护”需要请求认证的 resolver 函数不会发生错误。
 
-最后，为 Mutation.js 添加 import：
+最后，为 Mutation.js 引入依赖：
 
 ```js
 const bcrypt = require('bcryptjs')
@@ -272,71 +235,125 @@ const jwt = require('jsonwebtoken')
 const { APP_SECRET, getUserId } = require('../utils')
 ```
 
+到此为止，我们还有个小问题：需要使用 context 访问 request 对象。但是我们只为 context 绑定了 prisma 客户端实例，还并没有为 context 添加 request 对象。
+
+我们只需要调整 index.js 中，GraphQLServer 实例化代码即可：
+
+```js
+const server = new GraphQLServer({
+  typeDefs: './src/schema.graphql',
+  resolvers,
+  context: request => {
+    return {
+      ...request,
+      prisma,
+    }
+  },
+})
+```
+
+这里我们使用了一个函数返回 context 结果，而不是像之前那样直接使用一个对象。这种方法的优点是，我们可以将携带 GraphQL query 或 mutation 的 HTTP 请求也绑定到 context 上。这就让所有的 resolever 函数都能读取到认证信息头，并用来验证用户是否有权限发起当前的请求。
+
 ## 为 post mutation 添加认证
 
-在真正测试你的认证流之前，确保完成 schema/resolver 函数的构建。目前 post resolver 还没有写。
+在测试认证流之前，我们还要确保完成 schema/resolver 函数的配置。目前 post resolver 还没有写。
 
-在 Mutation.js 中，添加 post resolver 的实现：
+在 Mutation.js 中，添加 post resolver 函数的实现：
 
 ```js
 function post(parent, args, context, info) {
   const userId = getUserId(context)
-  return context.db.mutation.createLink(
-    {
-      data: {
-        url: args.url,
-        description: args.description,
-        postedBy: { connect: { id: userId } },
-      },
-    },
-    info,
-  )
+  return context.prisma.createLink({
+    url: args.url,
+    description: args.description,
+    postedBy: { connect: { id: userId } },
+  })
 }
 ```
 
-和前面的实现相比，上文的这个实现有两点不同：
+和之前相比，上文的实现有两点不同：
 
-1. 现在你用 getUserId 函数来从 jwt 存储中获取用户的 id，它被设置在了传入的 http 请求的认证头部里。因此，你就知道了是哪个用户创建了 Link。前文中提过，如果获取用户 id 失败，将会导致错误，那么函数就会在新建 Link 之前退出了。
+1. 现在我们用 getUserId 函数获取用户的 id。ID 被存储于 HTTP 请求认证头部设置的 jwt 中。这样我们就知道了是哪个用户创建了新的 Link。前文中提过，如果获取用户 id 失败，函数将会报错。那么执行 createLink 之前函数就会返回。这样的话，GraphQL 应答将只会包含一个错误，告诉用户他没有通过认证。
 
-2. 接下来你还需要用这个 userId 来链接当前这个用户创建的 Link。这个是通过 connect mutation 实现的。
+2. 接下来使用这个 userId 来将这个被创建的 Link 与创建它的用户连接起来。连接是通过[嵌套对象语法 nested object writes](https://www.prisma.io/docs/-rsc6#nested-object-writes)完成的。
 
-棒极了！最后，你需要用信息 resolver 来实现 index.js 中的代码：
+最后，我们还必须确保 User 和 Link 之间的关联能够正确的解析。
 
-打开 index.js 然后在文件顶部引入包含 resolvers 的模块：
+还记得之前我们省略了一部分 resolever 的实现吗：
+
+```graphql
+Link: {
+  id: parent => parent.id,
+  url: parent => parent.url,
+  description: parent => parent.description,
+}
+```
+
+但是现在，Link 的 postedBy 字段和 User 的 links 字段不能直接省略了。我们需要完成这两个字段的实现，因为 GraphQL 服务无法推断出这两个字段的数据应该如何取得。
+
+在 resolvers/Link.js 中添加：
+
+```js
+function postedBy(parent, args, context) {
+  return context.prisma.link({ id: parent.id }).postedBy()
+}
+
+module.exports = {
+  postedBy,
+}
+```
+
+注意，我们需要调用 prisma 客户端实例返回 Link 数据的 postedBy() 方法，因为这个 postedBy resolver 函数解析的是 schema.graphql 定义中 Link 类型的 postedBy 字段。
+
+类似的，在 resolvers/User.js 中添加：
+
+```js
+function links(parent, args, context) {
+  return context.prisma.user({ id: parent.id }).links()
+}
+
+module.exports = {
+  links,
+}
+```
+
+### 代码整理
+
+我们需要修改 index.js 文件，引入相关模块，并修改 resolvers 的定义：
 
 ```js
 const Query = require('./resolvers/Query')
 const Mutation = require('./resolvers/Mutation')
-const AuthPayload = require('./resolvers/AuthPayload')
-```
+const User = require('./resolvers/User')
+const Link = require('./resolvers/Link')
 
-然后更新 resolvers 对象：
+//...
 
-```js
 const resolvers = {
   Query,
   Mutation,
-  AuthPayload
+  User,
+  Link
 }
 ```
 
-现在你可以测试一下这个认证流了！
+现在你可以测试这个认证流了！
 
 ## 测试
 
-测试 signup mutation 的第一件事就是在数据库中新建一个 user。
+首先我们测试 signup mutation，成功后数据库中会新增一个 User 类型信息。
 
-> 如果你还没有这么做，ctrl+c 停止服务，然后运行 node src/index.js。之后通过在 GraphQL CLI 中运行 graphql playground 打开 playground。
+> 测试之前，使用 ctrl+c 停止服务，然后运行 `node src/index.js`。浏览器打开 http://localhost:4000，这个地址会运行 GraphQL Playground。
 
-注意到，只要你一直没有关闭页面，你就你可一重复利用你的 playground —— 重要的是你是否启动了服务，所以你做的变化能够被应用。
+注意到，只要没有关闭页面，我们就可以重复使用这个 playground —— 但是还请务必重新启动服务器，这样我们刚才所做的代码更改才会生效，这一点很重要。
 
 现在，发送如下的 mutation 来创建用户：
 
-```js
+```graphql
 mutation {
   signup(
     name: "Alice"
-    email: "alice@graph.cool"
+    email: "alice@prisma.io"
     password: "graphql"
   ) {
     token
@@ -347,19 +364,19 @@ mutation {
 }
 ```
 
-从服务端返回的应答中拷贝认证 token 然后打开另一个标签页。在这个新的标签页中，从左下角打开 HTTP HEADERS 面板然后填写好认证头部。
+从服务端返回的应答中拷贝认证 token 然后打开 playground 另一个标签页。在这个新的标签页中，从左下角打开 HTTP HEADERS 面板然后填写好认证头部。
 
-```js
+```json
 {
   "Authorization": "Bearer __TOKEN__"
 }
 ```
 
-现在，无论你在这个面板发送 query 还是 mutation，它都会挟带这这个认证 token。
+现在，无论你在这个面板发送任何 query 或 mutation 请求，它都会挟带这这个认证 token。
 
-有了这个认证头部，发送如下的 post 请求到你的 GraphQL 服务：
+有了这个认证头部，发送如下 post 请求到 GraphQL 服务：
 
-```js
+```graphql
 mutation {
   post(
     url: "www.graphql-europe.org"
@@ -370,14 +387,14 @@ mutation {
 }
 ```
 
-服务收到这个请求，就会触发 post resolver 函数，然后认证提供的 jwt。接下来，一个新的 Link 就被创建了。
+服务收到这个请求，就会触发 post resolver 函数，然后认证请求提供的 jwt。接下来，一个新的新闻链接就被创建了，同时它会和刚才 signup 的用户相关联。
 
 为了确认一切正常工作，你可以发送如下 login mutation：
 
 ```js
 mutation {
   login(
-    email: "alice@graph.cool"
+    email: "alice@prisma.io"
     password: "graphql"
   ) {
     token
@@ -392,4 +409,23 @@ mutation {
 }
 ```
 
-[self Proofreading +1]
+服务端将会返回：
+
+```json
+{
+  "data": {
+    "login": {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjanBzaHVsazJoM3lqMDk0NzZzd2JrOHVnIiwiaWF0IjoxNTQ1MDYyNTQyfQ.KjGZTxr1jyJH7HcT_0glRInBef37OKCTDl0tZzogekw",
+      "user": {
+        "email": "alice@prisma.io",
+        "links": [
+          {
+            "url": "www.graphqlconf.org",
+            "description": "An awesome GraphQL conference"
+          }
+        ]
+      }
+    }
+  }
+}
+```
