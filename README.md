@@ -50,3 +50,4 @@ PS：最近本仓库正在持续的校对+更新中，fork 了的小伙伴记得
   * [为服务添加数据库](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/3-NodeJsTutorial/4-AddingADatabase.md)
   * [使用 Prisma 客户端，连接服务与数据库](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/3-NodeJsTutorial/5-ConnectingServerAndDatabasewithPrismaClient.md)
   * [认证](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/3-NodeJsTutorial/6-Authentication.md)
+  * [GraphQL subscription 实时订阅](https://github.com/EmilyQiRabbit/GraphQLTranslation/blob/master/3-NodeJsTutorial/7-RealtimeGraphQLSubscriptions.md)
